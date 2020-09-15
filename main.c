@@ -13,8 +13,9 @@ int main(int argc, char **argv){
 
     //int make = mkdir("prueba", S_IRWXU | S_IRWXG | S_IRWXO);
 
-    // Cambiar path
-    FD = opendir("/home/sofia/github/SO");
+    char dir_name[PATH_MAX];
+    getcwd(dir_name,sizeof(dir_name));
+    FD = opendir(dir_name);
     while ((in_file = readdir(FD))){
 
         if (!strcmp (in_file->d_name, "."))
