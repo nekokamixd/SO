@@ -28,7 +28,7 @@ void prev(lista *list);
 
 void insert(lista *list,int pos, dato *valor);
 
-int leght(lista* list);
+int length(lista* list);
 
 void clear(lista *list);
 
