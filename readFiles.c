@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "lista.h"
 
 
@@ -16,7 +17,7 @@ typedef struct Juego{
 
 /* NOTA *************
 * funcion: dato *readFile(File *fp)
-********************************* 
+*********************************
 * basicamente hay que pasarle el puntero a archivo a la funcion
 * y esta devolverá las categorias de un juego organizadas en un struct
 *********************************
@@ -32,20 +33,20 @@ dato* readFile(FILE *fp){
     //dp es el tipo dato que contendrá al juego en si en el campo "contenido"
     //flag servirá para saber si la linea de categorias se termino de leer
     //buff contendra el nombre del juego y despues las categorias
-    
-    
+
+
     dp = (dato*)malloc(sizeof(dato));
     dp->contenido = (tipoJuego*)malloc(sizeof(tipoJuego));
     dp->tipo = 'j';//esto es cualquier cosa, ignorar
 
-    
+
     fgets(buff,255,fp); // obtener nombre del juego
     strcpy(   ((tipoJuego*)dp->contenido)->nombre_juego   ,   buff); //colocar nombre en struct
     init(   &((tipoJuego*)dp->contenido)->categorias   );   //inicializar categorias como lista
     ((tipoJuego*)dp->contenido)->prioridad = 0;             //iniciar prioridad
-    
+
     dato *cat;
-    
+
     while (flag == 1){
         // bloque para colocar categorias en una lista
         if (fscanf(fp,"%[a-zA-Z0-9]",buff)){
@@ -70,9 +71,23 @@ dato* readFile(FILE *fp){
     return dp;
 };
 
+int crear_carpeta(char* nombre){
+    int make = mkdir(nombre, S_IRWXU | S_IRWXG | S_IRWXO);
+    return make;
+}
+
 int main(){
     FILE *fp;
-    fp = fopen("prueba.txt","r");
-    readFile(fp);
+    dato* juego;
+    char nombre;
+
+    fp = fopen("Ligo Leyen.txt","r");
+    juego = readFile(fp);
+
+    nombre = juego->nombre_juego;
+    printf("%c", nombre);
+
+    char* categoria = "Categoria";
+    crear_carpeta(categoria);
     return 0;
 }

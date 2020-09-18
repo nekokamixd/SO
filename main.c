@@ -5,33 +5,45 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <errno.h>
+//#include "readFiles.c"
 
-int main(int argc, char **argv){
+int main(){
     DIR* FD;
-    struct dirent* in_file;
-    FILE    *entry_file;
+    struct dirent* s_archivo;
+    FILE* archivo;
+    char nombre_carpeta[PATH_MAX];
+    char* nombre_archivo;
+    char* text = ".txt";
+    char* ret;
 
     //int make = mkdir("prueba", S_IRWXU | S_IRWXG | S_IRWXO);
 
-    char dir_name[PATH_MAX];
-    getcwd(dir_name,sizeof(dir_name));
-    FD = opendir(dir_name);
-    while ((in_file = readdir(FD))){
+    getcwd(nombre_carpeta, sizeof(nombre_carpeta));
+    FD = opendir(nombre_carpeta);
 
-        if (!strcmp (in_file->d_name, "."))
+    while ((s_archivo = readdir(FD))){
+
+        if (!strcmp (s_archivo->d_name, "."))
             continue;
-        if (!strcmp (in_file->d_name, ".."))
+        if (!strcmp (s_archivo->d_name, ".."))
             continue;
 
-        entry_file = fopen(in_file->d_name, "r");
-        if (entry_file == NULL){
+        archivo = fopen(s_archivo->d_name, "r");
+        if (archivo == NULL){
             fprintf(stderr, "Error : Failed to open entry file - %s\n", strerror(errno));
             return 1;
         }
 
-        printf("%s", in_file->d_name);
+        // Reconocer archivos .txt
+        nombre_archivo = s_archivo->d_name;
+        printf("%s", nombre_archivo);
+        ret = strstr(nombre_archivo, text);
+        if (ret != NULL){
+            printf("%s", " xd");
+        }
+
         printf("%s", "\n");
-        fclose(entry_file);
+        fclose(archivo);
     }
 
     return 0;
