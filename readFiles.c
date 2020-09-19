@@ -71,23 +71,36 @@ dato* readFile(FILE *fp){
     return dp;
 };
 
-int crear_carpeta(char* nombre){
-    int make = mkdir(nombre, S_IRWXU | S_IRWXG | S_IRWXO);
+int crear_carpeta(char* categoria, char* juego){
+    char path[PATH_MAX];
+    char new_path[PATH_MAX];
+
+    int make = mkdir(categoria, S_IRWXU | S_IRWXG | S_IRWXO);
+
+    getcwd(path, sizeof(path));
+    strcpy(new_path, path);
+    strcat(path, "/");
+    strcat(path, juego);
+
+    strcat(new_path, "/");
+    strcat(new_path, categoria);
+    strcat(new_path, "/");
+    strcat(new_path, juego);
+
+    rename(path, new_path);
+
     return make;
 }
 
 int main(){
     FILE *fp;
-    dato* juego;
-    char nombre;
 
-    fp = fopen("Ligo Leyen.txt","r");
-    juego = readFile(fp);
+    fp = fopen("Amongas.txt","r");
+    readFile(fp);
 
-    nombre = juego->nombre_juego;
-    printf("%c", nombre);
+    char* categoria = "Multiplayer";
+    char* juego = "Amongas.txt";
+    crear_carpeta(categoria, juego);
 
-    char* categoria = "Categoria";
-    crear_carpeta(categoria);
     return 0;
 }

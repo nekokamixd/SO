@@ -16,8 +16,6 @@ int main(){
     char* text = ".txt";
     char* ret;
 
-    //int make = mkdir("prueba", S_IRWXU | S_IRWXG | S_IRWXO);
-
     getcwd(nombre_carpeta, sizeof(nombre_carpeta));
     FD = opendir(nombre_carpeta);
 
