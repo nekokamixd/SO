@@ -57,6 +57,7 @@ int main(){
         if (ret != NULL){
             fp = fopen(nombre_archivo, "r");
             dp = readFile(fp);
+            append(juegos, dp);
             dp = at(((tipoJuego*)dp->contenido)->categorias, 0);
             crear_carpeta((char*)dp->contenido, nombre_archivo);
             fclose(fp);
@@ -100,7 +101,7 @@ int main(){
                     dp = at(juegos, i);
                     printf("%s\n", ((chartSec*)dp->contenido)->nombre_juego); //ASFJDHAKSHDLAKSFHALSFHLKAKSHADL
                 }
-
+                
             }
             else {break};
         }
