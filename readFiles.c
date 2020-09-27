@@ -10,14 +10,16 @@
 #include "lista.h"
 #include "readFiles.h"
 
-/* NOTA *************
-* funcion: dato *readFile(File *fp)
-*********************************
-* basicamente hay que pasarle el puntero a archivo a la funcion
-* y esta devolverá las categorias de un juego organizadas en un struct
-*********************************
-* return: puse el struct en un tipo "dato" para que se pudiese agregar
-* directamente a la lista de juegos
+/*
+readFile()
+Lee un unio archivo de juego y extrae todos los
+datos del mismo para almacenarlos en un struct.
+——————————————–
+Inputs:
+FILE* fp : puntero al archivo a leer.
+——————————————–
+Output:
+dato* dp : puntero al struct del juego.
 */
 
 dato* readFile(FILE *fp){
@@ -44,7 +46,7 @@ dato* readFile(FILE *fp){
         if (fscanf(fp,"%[a-zA-Z0-9]",buff)){
             cat = (dato*)malloc(sizeof(dato));
             cat->contenido = (char*)malloc(sizeof(char)*256);
-            cat->tipo = 'c';
+            cat->tipo = 's';
             strcpy(cat->contenido,buff);
             append(gp->categorias,cat);
             gp->prioridad += 1;
@@ -63,6 +65,7 @@ dato* readFile(FILE *fp){
 
     dp = (dato*)malloc(sizeof(dato));
     dp->contenido = gp;
+    dp->tipo = 'J';
 
     return dp;
 };
@@ -88,6 +91,22 @@ int crear_carpeta(char* categoria, char* juego){
     return make;
 }
 
+/*
+ordenarJuegos()
+toma todos los Juegos de una lista, y los ordena
+por categoria y por cantidad de categorias para
+las cuales el juego califique en una matriz.
+Notar que la lista input queda intacta, es decir,
+la matriz generada es totalmente nueva.
+——————————————–
+Inputs:
+lista* games : puntero a la lista de juegos.
+lista** chart : la direccion de memoria del puntero
+en main para almacenar en el la direccion de la matriz.
+——————————————–
+Output:
+void : no hay retorno propiamente tal.
+*/
 void ordenarJuegos(lista *games, lista **chart){
     lista *lp,*categoria; // --> tabla ordenada
     init(&lp);
@@ -156,12 +175,15 @@ void ordenarJuegos(lista *games, lista **chart){
             auxDato->contenido = categoria;
             append(lp,auxDato);
             //agregar nombre y juego a la categoria
+
+            //nombre categoria
             auxDato = malloc(sizeof(dato));
             auxDato->contenido = malloc(sizeof(char)*20);
             strcpy((char*)auxDato->contenido,catJuegoActual);
-            auxDato->tipo = 'c';
+            auxDato->tipo = 's';
             append(categoria,auxDato);
 
+            //juego
             auxDato = malloc(sizeof(dato));
             auxSeccion = malloc(sizeof(chartSec));
             auxSeccion->prioridad = juegoActual->prioridad;
@@ -177,6 +199,20 @@ void ordenarJuegos(lista *games, lista **chart){
     return;
 }
 
+/*
+consola()
+funcion para hacer los efectos de navegacion
+por la biblioteca de juegos.
+——————————————–
+Inputs:
+lista* games : puntero a la lista de juegos.
+lista* chart : puntero a la matriz con juegos
+ordenados.
+——————————————–
+Output:
+int : el programa se ha ejecutado correctamente.
+*/
+
 int consola(lista* juegos, lista* tabla){
     dato* dp;
     dato* dp_juego;
@@ -188,7 +224,7 @@ int consola(lista* juegos, lista* tabla){
 
     tipoJuego* info_juego;
     dato* dato_categoria;
-    char string_categorias[1025];
+    
 
     while(strcmp(opcion_categoria, "Salir") != 0){
 
@@ -234,6 +270,7 @@ int consola(lista* juegos, lista* tabla){
 
                         if(strncmp(opcion_juego, info_juego->nombre_juego, strlen(opcion_juego)) == 0){
                             existe_juego = 1;
+                            char string_categorias[1024] = "";
                             printf("%s", "\nNombre del juego: ");
                             printf("%s", info_juego->nombre_juego);
                             printf("%s", "Categorias: ");

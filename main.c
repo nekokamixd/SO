@@ -49,11 +49,18 @@ int main(){
 
         fclose(archivo);
     }
-
+    closedir(FD);
     lista* datos;
 
     ordenarJuegos(juegos, &datos);
     consola(juegos, datos);
+
+    clear(juegos);
+    destroy(juegos);
+    clear(datos);
+    destroy(datos);
+    free(juegos);
+    free(datos);
 
     return 0;
 }

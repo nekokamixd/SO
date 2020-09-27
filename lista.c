@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include"lista.h"
+#include"readFiles.h"
 
 void init(lista **list){ /*inicializacion de lista, todos los punteros de la lista apuntan a un mismo nodo dummy*/
     *list = malloc(sizeof(lista));
@@ -178,14 +179,25 @@ void clear(lista *list){
     for (int i = 0; i<list->length ;i++){
         aux1 = aux2;
         aux2 = aux1->next;
-        if (aux1->info->tipo == 'l'){
+        if (aux1->info->tipo == 'l')
+        {
             clear((lista*)aux1->info->contenido);
             destroy((lista*)aux1->info->contenido);
+            free(aux1->info);
             free(aux1);
+        }
+        else if(aux1->info->tipo == 'J'){
+            tipoJuego* auxJuego = aux1->info->contenido;
+            clear(auxJuego->categorias);
+            destroy(auxJuego->categorias);
+            free(aux1->info->contenido);
+            free(aux1->info);
+            free(aux1); 
         }
         else
         {
             free(aux1->info->contenido);
+            free(aux1->info);
             free(aux1);
         }
     }

@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 typedef struct Juego{
-    char nombre_juego[256],creador[256],descripcion[1024];
+    char nombre_juego[256],creador[256],descripcion[500];
     int prioridad;
     lista *categorias;
 }tipoJuego;
