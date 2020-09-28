@@ -18,18 +18,18 @@ inicializa la memoria y datos de una lista (lista*) y le asigna también
 memoria al primer nodo de la lista (dummy).
 ——————————————–
 Inputs:
-(*lista list) lista que se desea inicializazr. 
+(*lista list) lista que se desea inicializar.
 ——————————————–
 Output:
 void, no hace retorno, solo cambia valores
 */
 
 void append(lista *list, dato *valor){
-    /*se inicializa el dcontenento recibido dentro de un nodo*/
+    /*se inicializa el contenido recibido dentro de un nodo*/
     nodo *aux = (nodo*)malloc(sizeof(nodo));
     aux->info = valor;
     aux->next = NULL;
-    /*si la lista no tiene elementos, entonces solo se agrega el nodo al principio. En caso contrario, 
+    /*si la lista no tiene elementos, entonces solo se agrega el nodo al principio. En caso contrario,
     se agrega al final y se mueve el puntero cola al siguiente nodo para no perder la referencia*/
     if (list->length == 0) list->head->next = aux;
     else
@@ -54,7 +54,7 @@ void, no hace retorno
 
 void next(lista *list){
     /*en caso de que el puntero "actual" se encuentre en la misma posicion que la cola de la lista,
-    ya no se puede avanzar, por lo tanto no se mueve el puntero. De este modo se evita también que se 
+    ya no se puede avanzar, por lo tanto no se mueve el puntero. De este modo se evita también que se
     mueva el puntero al haber 0 o 1 elemento en la lista  */
     if (list->actual == list->tail) return;
     else
@@ -103,7 +103,7 @@ void prev(lista *list){
     if (list->actual == list->head) return;
     else
     {
-        nodo *aux = list->actual;   
+        nodo *aux = list->actual;
         goTo(list,0);
         while (list->actual->next != aux)
             {
@@ -192,7 +192,7 @@ void clear(lista *list){
             destroy(auxJuego->categorias);
             free(aux1->info->contenido);
             free(aux1->info);
-            free(aux1); 
+            free(aux1);
         }
         else
         {
@@ -240,13 +240,13 @@ void removeNodo(lista *list,int pos){
     nodo *aux = list->actual->next;
     list->actual->next = aux->next;
 
-    if (list->actual == list->tail) 
+    if (list->actual == list->tail)
     {
         prev(list);
         list->tail = list->actual;
     }
     if (aux == list->tail) list->tail = list->actual;
-    
+
     if (aux->info->tipo == 'l')
     {
         clear((lista*)aux->info->contenido);

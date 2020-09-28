@@ -12,7 +12,7 @@
 
 /*
 readFile()
-Lee un unio archivo de juego y extrae todos los
+Lee un unico archivo de juego y extrae todos los
 datos del mismo para almacenarlos en un struct.
 ——————————————–
 Inputs:
@@ -201,7 +201,7 @@ void ordenarJuegos(lista *games, lista **chart){
 
 /*
 consola()
-funcion para hacer los efectos de navegacion
+Funcion para hacer los efectos de navegacion
 por la biblioteca de juegos.
 ——————————————–
 Inputs:
@@ -224,7 +224,7 @@ int consola(lista* juegos, lista* tabla){
 
     tipoJuego* info_juego;
     dato* dato_categoria;
-    
+
 
     while(strcmp(opcion_categoria, "Salir") != 0){
 
