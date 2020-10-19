@@ -1,4 +1,4 @@
 Emblema de Fuego
-Estrategia, Fantasia, RPG
+Estrategia, RPG
 Noentiendo
 Comanda tropas por turnos para ganar las batallas, pero si tu compañero se muere, se muere.
