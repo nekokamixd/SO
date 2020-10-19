@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <time.h> //srand y rand
+#include <unistd.h> //pipes y cosas
 
 int main(){
     int tablero[29];
