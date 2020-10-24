@@ -4,6 +4,7 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <time.h>
 
 //***** Complementos
 #define num_players 4
@@ -19,15 +20,76 @@
 #define blanca 2
 #define podNor 3 //poder normal
 #define podSup 4 //poder superior
+#define numCasillas 2
 
+int calcular_offset(int jugador, int actual){
+    int offset = (jugador-1) * (numCasillas-1) + actual;
+    return offset;
+}
+
+int mover_pieza(char* direccion, int cantidad, int jugador, int actual, int*tablero){
+    // i = Jugador o tablero, j = casilla
+    int nueva_posicion;
+    //int offset = (jugador-1) * numCasillas + actual;
+
+    if (strcmp(direccion, "b") == 0){
+        nueva_posicion = actual - cantidad;
+        //Verificar inicio
+    }
+    else if(strcmp(direccion, "f") == 0){
+        nueva_posicion = actual + cantidad;
+    }
+
+    //int nuevo_offset = (jugador-1) * numCasillas + nueva_posicion;
+    /*
+    tablero[offset] = 0;
+    tablero[nuevo_offset] = 1;*/
+    return nueva_posicion;
+}
 
 /*
-    el struct va a quedar
+int poder_Nor(){
+    srand(time(0));
+    int poder = rand()%5;
+    if (poder == 0){
+        mover_pieza("b", 2); //El jugador que la activa
+    }
+    else if (poder == 1){
+        mover_pieza("b", 1); //Los demas jugadores
+    }
+    else if (poder == 2){
+        mover_pieza("f", 1); //El jugador que la activa
+    }
+    else if (poder == 3){
+        skip_turn(); //Para el siguiente jugador
+    }
+    else if (poder == 4){
+        //Cambio en el sentido de los turnos
+    }
+    return 0;
+}
+
+int poder_Sup(){
+    srand(time(0));
+    int poder = rand()%10;
+    if ((poder == 0) || (poder == 1) || (poder == 2)){
+        mover_pieza("b", 2); //TODOS los jugadores
+    }
+    else if ((poder == 3) || (poder == 4)){
+        //Los demas jugadores avanzan hasta la proxima casilla/cuadricula blanca
+    }
+    else if ((poder == 5) || (poder == 6)){
+        //Cambio de posicion con el jugador que va ultimo
+    }
+    else if ((poder == 7) || (poder == 8)){
+        //Cambio de posicion con el jugador que va primero
+    }
+    else if (poder == 9){
+        //Cambio en el sentido del tablero
+    }
+    return 0;
+}
 */
-typedef struct structCasilla{
-    int jugador[num_players];
-    int tipo;
-}casilla;
 
 void* create_shared_memory(size_t size) {
 
@@ -49,7 +111,7 @@ int main(){
     int pipeFC[2];
     int pipeCF[2];
 
-    int x = 0, id[4];
+    int x = 0;
 
     pipe(pipeFC);
     pipe(pipeCF);
@@ -58,7 +120,7 @@ int main(){
     /*
     tablero  --> puntero al tablero(array de casillas)
     */
-    casilla *tablero = create_shared_memory((num_players + 1)*30);
+    int *tablero = create_shared_memory((num_players + 1)*numCasillas);
 
 
     /*
@@ -67,32 +129,35 @@ int main(){
 
     **Nota: el padre guarda el numero de proceso de los hijos
     */
-    int id[num_players];
+    int id_jugador[num_players];
+    int jugador;
 
     for (int i = 0; i < num_players; i++){
         x = fork();
         if (x < 0){return 1;}// caso de error
-        else if (x == 0){x = i;break;}// si soy hijo salgo
+        else if (x == 0){jugador = i+1;break;}// si soy hijo salgo
         else if (x > 0){//agrego id de proceso hijo al array
-            id[i] = x;
+            id_jugador[i] = x;
+            printf("x: %d\n", x);
             }
     }
 
     /*
     instruccion    --> buffer para recibir y escribir instrucciones a los hijos
     */
-    char instruccion[5];
+    char instruccion[msg_len];
 
 
 
     if (x > 0){// PROCESO PADRE
         close(pipeFC[0]);// cierro terminal de lectura ya que en esta pipe escribo al hijo
         close(pipeCF[1]);// cierro terminal de escritura ya que en esta pipe leo lo que envio el hijo
+        int id_hijo;
 
-        
+
         //turno   --> variable para iterar sobre los turnos
         int turno = 0;
-        
+
         /*
         Loop del Padre
 
@@ -104,12 +169,15 @@ int main(){
         statusOK    --> corresponde al hecho de que un turno terminó sin novedad, es decir lanzar
                         dados y avanzar, sin activar casillas. En este caso se sigue iterando en la
                         lista de jugadores.
-        statusWIN   --> corresponde al caso de que un jugador al suceder un movimiento llegue al 
+        statusWIN   --> corresponde al caso de que un jugador al suceder un movimiento llegue al
                         final del tablero. En este caso se le manda un mensaje a los jugadores para
                         que terminen su proceso.
         otro        --> corresponde a los mensajes de activacion de las casillas
         */
         while(strcmp(statusWIN,instruccion)!=0){
+            printf("Turno: %d\n", turno);
+            id_hijo = id_jugador[turno%4];
+            printf("id_hijo: %d\n", id_hijo);
 
             /*
             empaquetado de instrucción:
@@ -119,7 +187,7 @@ int main(){
                 'b' -> back
                 'f' -> forward
             */
-            memcpy(instruccion,id[turno%4],sizeof(int));
+            memcpy(instruccion,&id_hijo,sizeof(int));
             instruccion[4] = 't';
 
             /*
@@ -142,37 +210,47 @@ int main(){
             else{/*codigo para retransmitir poderes de casillas*/}
             turno++;
         }
-        /*escribir mensaje de salida<-----------------*/
+        printf("%s\n", "Sos un crack ganastes");
 
     }
 
 
 
     else if(x == 0){ // PROCESO HIJO
+        int casilla_final = calcular_offset(jugador, numCasillas);
+        //int casilla_inicio = calcular_offset(jugador, 0);
         close(pipeFC[1]);// cierro terminal de escritura ya que en esta pipe leo
         close(pipeCF[0]);// cierro terminal de lectura ya que en esta pipe escribo
 
-        /*
-        
-        */
         int pos_actual = 0;
         while(strcmp(statusEND,instruccion)!=0){
             while(read(pipeFC[0],instruccion,msg_len)<0){};
             memcpy(&x,instruccion,4);
             if(x == getpid() && instruccion[4]=='t'){   // es el turno del proceso
 
-                /* codigo para que el proceso mueva su propia ficha*/
-                
-                if(/*codigo para determinar si el jugador gano despues de lanzar dado*/){
+                srand(time(0));
+                int dado = rand()%6+1;
+                printf("Soy el jugador: %d\n", jugador);
+                printf("Posicion actual: %d\n", pos_actual);
+                printf("Dado: %d\n", dado);
+
+                int pos_antigua = pos_actual;
+                pos_actual = mover_pieza("f", dado, jugador, pos_actual, tablero);
+                printf("Ahora estoy en: %d\n\n", pos_actual);
+
+                if(pos_actual >= casilla_final){
                     write(pipeCF[1],statusWIN,msg_len);
                     break;
                 }
                 else{
+                    tablero[pos_antigua] = 0;
+                    tablero[pos_actual] = 1;
                     write(pipeCF[1],statusOK,msg_len);
                 }
             }
             else if(instruccion[4] == 'f' || instruccion[4] == 'b'){/*codigo para manejar efectos de casillas*/}
-            else if(strcmp(instruccion,statusEND)){break;}
+            else if(strcmp(instruccion,statusEND) == 0){break;}
+            else{}
         }
         exit(0);
     }
