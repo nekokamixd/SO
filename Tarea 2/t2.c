@@ -20,7 +20,7 @@
 #define blanca 2
 #define podNor 3 //poder normal
 #define podSup 4 //poder superior
-#define numCasillas 2
+#define numCasillas 19
 
 int calcular_offset(int jugador, int actual){
     int offset = (jugador-1) * (numCasillas-1) + actual;
@@ -68,7 +68,6 @@ int poder_Nor(){
     }
     return 0;
 }
-
 int poder_Sup(){
     srand(time(0));
     int poder = rand()%10;
@@ -102,35 +101,50 @@ void* create_shared_memory(size_t size) {
 
 int main(){
     /*****************************************
-    Inicializar pipes y el valor x
-
-    pipeFC --> envia mensajes desde el padre a los hijos (Father to Children)
-    pipeCF --> envia mensajes desde el hijo al padre (Children to Father)
+    Inicializar pipes y el valor x (pid)
+    pipeNC --> envia mensajes desde el padre a al hijo N   (N e {1,2,3,4})
+    pipeCN --> envia mensajes desde el hijo al padre
     x      --> será la variable que contendrá el pid de los procesos
     */
-    int pipeFC[2];
-    int pipeCF[2];
 
     int x = 0;
 
-    pipe(pipeFC);
-    pipe(pipeCF);
-    /******************************************/
 
     /*
-    tablero  --> puntero al tablero(array de casillas)
+    MEMORIA COMPARTIDA
+    
+    tablero         --> puntero al tablero(array de casillas)
+    pipe_jugador    --> array que contiene las pipes de todos los jugadores
     */
-    int *tablero = create_shared_memory((num_players + 1)*numCasillas);
-
-
+    int *tablero = create_shared_memory((num_players + 1)*numCasillas*sizeof(int));
+    int *pipe_jugador[num_players][2];
+    
     /*
-    loop para crear procesos, solo se crearan 4 procesos hijos,
-    todos producidos por el padre, notar que si el pid = 0 se rompe el loop
+    TABLERO MODO MATRIZ
 
-    **Nota: el padre guarda el numero de proceso de los hijos
+    int **tablero = create_shared_memory((num_players + 1)*sizeof(int*));
+    for (int i = 0; i < numCasillas; i++){
+        tablero[i] = create_shared_memory(numCasillas*sizeof(int));
+    }
     */
-    int id_jugador[num_players];
+
+    for(int i = 0; i < num_players; i++){
+        pipe_jugador[i][0] = alloca(sizeof(int)*2);
+        pipe_jugador[i][1] = alloca(sizeof(int)*2);
+        pipe(pipe_jugador[i][0]);
+        pipe(pipe_jugador[i][1]);
+    }
+
+    
+    /*
+    VARIABLES
+
+    jugador         --> variable para contener el numero de jugador de un subproceso
+    id_jugador      --> array que contiene el pid de cada hijo
+    */
     int jugador;
+    int id_jugador[num_players];
+    int *pipeFC, *pipeCF;
 
     for (int i = 0; i < num_players; i++){
         x = fork();
@@ -138,7 +152,6 @@ int main(){
         else if (x == 0){jugador = i+1;break;}// si soy hijo salgo
         else if (x > 0){//agrego id de proceso hijo al array
             id_jugador[i] = x;
-            printf("x: %d\n", x);
             }
     }
 
@@ -150,43 +163,29 @@ int main(){
 
 
     if (x > 0){// PROCESO PADRE
-        close(pipeFC[0]);// cierro terminal de lectura ya que en esta pipe escribo al hijo
-        close(pipeCF[1]);// cierro terminal de escritura ya que en esta pipe leo lo que envio el hijo
+        /* cierro terminales que no usaré*/
+        
+        for(int i = 0; i < num_players; i++){
+            close(pipe_jugador[i][0][0]); // terminal de lectura
+            close(pipe_jugador[i][1][1]);// terminal de escritura
+        }
+        
+        //turno   --> variable para iterar sobre los turnos
+        //id_hijo --> variable que contendra el id del jugador en turno
+        //pipes   --> variables de comunicacion con hijos
+        
+        int turno = 0;
         int id_hijo;
 
-
-        //turno   --> variable para iterar sobre los turnos
-        int turno = 0;
-
-        /*
-        Loop del Padre
-
-        El padre funcionará como GameMaster, en el sentido de que no se desarrollaran interacciones
-        entre los jugadores sino que cada cambio global debe pasar por el gamemaster y es él quien se
-        lo comunica al resto de lso jugadores para que estos efectúen el cambio.
-
-        El padre responde a 3 tipos de mensajes
-        statusOK    --> corresponde al hecho de que un turno terminó sin novedad, es decir lanzar
-                        dados y avanzar, sin activar casillas. En este caso se sigue iterando en la
-                        lista de jugadores.
-        statusWIN   --> corresponde al caso de que un jugador al suceder un movimiento llegue al
-                        final del tablero. En este caso se le manda un mensaje a los jugadores para
-                        que terminen su proceso.
-        otro        --> corresponde a los mensajes de activacion de las casillas
-        */
         while(strcmp(statusWIN,instruccion)!=0){
-            printf("Turno: %d\n", turno);
+
             id_hijo = id_jugador[turno%4];
+            pipeFC = pipe_jugador[(turno%4)][0];
+            pipeCF = pipe_jugador[(turno%4)][1];
+
+            printf("Turno: %d\n", turno);
             printf("id_hijo: %d\n", id_hijo);
 
-            /*
-            empaquetado de instrucción:
-                La instrucción se anota en un array de tamaño 5, los primeros 4 bytes
-                corresponden a un entero y el quinto byte corresponde al tipo de instruccion.
-                't' -> turn
-                'b' -> back
-                'f' -> forward
-            */
             memcpy(instruccion,&id_hijo,sizeof(int));
             instruccion[4] = 't';
 
@@ -196,16 +195,18 @@ int main(){
             (por el momento). Despues de emitir dicho mensaje espera la respuesta del hijo y dependiendo
             del resultado efetúa diferentes acciones.
             */
-            for(int i = 0; i < num_players; i++){// indica turno del jugador
-                write(pipeFC[1],instruccion,msg_len);}
+            
+            write(pipeFC[1],instruccion,msg_len);// indica turno del jugador
 
             while(read(pipeCF[0],instruccion,msg_len) < 0){};//espera mensaje de hijo
 
             if(strcmp(instruccion,statusOK) == 0){}// el turno termino correctamente
             else if(strcmp(instruccion,statusWIN) == 0){// el jugador ganó
-                for(int i = 0; i < num_players-1; i++){ // indica a los otros jugadores el termino
-                    write(pipeFC[1],statusEND,msg_len);}
-                    break;
+                printf("hay ganador \n");
+                for(int i = 0; i < num_players; i++){ // indica a los otros jugadores el termino
+                    write(pipe_jugador[i][0][1],statusEND,msg_len);}
+                    wait(NULL);
+                    
             }
             else{/*codigo para retransmitir poderes de casillas*/}
             turno++;
@@ -218,6 +219,8 @@ int main(){
 
     else if(x == 0){ // PROCESO HIJO
         int casilla_final = calcular_offset(jugador, numCasillas);
+        pipeFC = pipe_jugador[jugador-1][0];
+        pipeCF = pipe_jugador[jugador-1][1];
         //int casilla_inicio = calcular_offset(jugador, 0);
         close(pipeFC[1]);// cierro terminal de escritura ya que en esta pipe leo
         close(pipeCF[0]);// cierro terminal de lectura ya que en esta pipe escribo
@@ -226,6 +229,7 @@ int main(){
         while(strcmp(statusEND,instruccion)!=0){
             while(read(pipeFC[0],instruccion,msg_len)<0){};
             memcpy(&x,instruccion,4);
+            
             if(x == getpid() && instruccion[4]=='t'){   // es el turno del proceso
 
                 srand(time(0));
@@ -240,7 +244,6 @@ int main(){
 
                 if(pos_actual >= casilla_final){
                     write(pipeCF[1],statusWIN,msg_len);
-                    break;
                 }
                 else{
                     tablero[pos_antigua] = 0;
@@ -249,10 +252,10 @@ int main(){
                 }
             }
             else if(instruccion[4] == 'f' || instruccion[4] == 'b'){/*codigo para manejar efectos de casillas*/}
-            else if(strcmp(instruccion,statusEND) == 0){break;}
+            else if(strcmp(instruccion,statusEND) == 0){printf("proceso terminado\n");}
             else{}
         }
-        exit(0);
+        return 0;
     }
     return 0;
 }
