@@ -19,11 +19,11 @@
 #define switchLast "0000u"  // cambia jugador actual por el ultimo
 #define reverse "0000r" // invierte orden de jugadores
 #define skip "0000s"    // salta turno
-#define nextWhite "0000n"   //
+#define nextWhite "0000n"   // los demas se mueven a la siguiente casilla blanca
 #define statusEND "1111e"   //mensaje para avisarle a los demas jugadores que el juego termino
 #define cursedBoard "0000C"   //mensaje para invertir tablero
-#define othersBack "0000b"
-#define allBack "0000B"
+#define othersBack "0000b"  // los demas retroceden una casilla
+#define allBack "0000B" // todos retroceden 2 casillas
 
 
 //***** Tipos de Casilla
@@ -124,16 +124,14 @@ void poder_Nor(char* aux){
 
     //El jugador retrocede una cuadricula
     if (poder == 0){
-        mover = 2;
+        mover = 1;
         memcpy(aux, &mover, sizeof(int));
         aux[4] = 'b';
     }
 
     //Los demas jugadores retroceden una cuadricula
     else if (poder == 1){
-        mover = 1;
-        memcpy(aux, &mover, sizeof(int));
-        aux[4] = 'B';
+        memcpy(aux, othersBack, msg_len);
     }
 
     //El jugador avanza una cuadricula
@@ -156,16 +154,13 @@ void poder_Nor(char* aux){
 }
 
 void poder_Sup(char* aux){
-    int mover;
 
     srand(time(0));
     int poder = rand()%10;
 
     //Todos los jugadores retroceden 2 cuadriculas
     if ((poder == 0) || (poder == 1) || (poder == 2)){
-        mover = 2;
-        memcpy(aux, &mover, sizeof(int));
-        aux[4] = 'B';
+        memcpy(aux, allBack, msg_len);
     }
 
     //Los demas jugadores avanzan hasta su proxima cuadricula blanca
@@ -393,6 +388,9 @@ int main(){
 
                 }
                 
+            }
+            else{
+                write(pipeFC[1],instruccion,msg_len);
             }
             //checkear ganador
             for (int i = 0; i < num_players; i++){
