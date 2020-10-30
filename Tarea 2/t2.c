@@ -425,6 +425,7 @@ int main(){
                 printf("Dado: %d\n", dado);
 
                 pos_actual = mover_pieza('f', dado, pos_actual, jugador, tablero);
+                pos[jugador-1] = pos_actual;
                 printf("Ahora estoy en: %d\n\n", pos_actual+1);
 
                 if(tablero[num_players][pos_actual] == podNor){
@@ -434,6 +435,7 @@ int main(){
                         scanf("%s", usarPoder);
                         if(strcmp(usarPoder, "si") == 0){
                             poder_Nor(instruccion);
+                            write(pipeCF[1],instruccion,msg_len);
                         }
                     }
                 }
@@ -444,9 +446,11 @@ int main(){
                         scanf("%s", usarPoder);
                         if(strcmp(usarPoder, "si") == 0){
                             poder_Sup(instruccion);
+                            write(pipeCF[1],instruccion,msg_len);
                         }
                     }
                 }
+                else{write(pipeCF[1],statusOK,msg_len);}
 
                 if(pos_actual >= numCasillas){
                     write(pipeCF[1],statusWIN,msg_len);
