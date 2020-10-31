@@ -21,11 +21,9 @@
 #define switchLast "0000u"  // cambia jugador actual por el ultimo
 #define reverse "0000r" // invierte orden de jugadores
 #define skip "0000s"    // salta turno
-#define nextWhite "0000n"   // los demas se mueven a la siguiente casilla blanca
+#define nextWhite "0000n"   //
 #define statusEND "1111e"   //mensaje para avisarle a los demas jugadores que el juego termino
-#define cursedBoard "0000C"   //mensaje para invertir tablero
-#define othersBack "0000b"  // los demas retroceden una casilla
-#define allBack "0000B" // todos retroceden 2 casillas
+#define cursedBoard "0000B"   //mensaje para invertir tablero
 
 //***** Tipos de Casilla
 #define inicio 0
@@ -47,11 +45,11 @@ int main(){
 
     /*
     MEMORIA COMPARTIDA
+
     tablero         --> puntero al tablero(array de casillas)
     pipe_jugador    --> array que contiene las pipes de todos los jugadores
     */
-
-    int *pos = create_shared_memory(num_players*sizeof(int));
+    //int *tablero = create_shared_memory((num_players + 1)*numCasillas*sizeof(int));
     int *pipe_jugador[num_players][2];
 
     //TABLERO MODO MATRIZ
@@ -75,26 +73,29 @@ int main(){
         pipe(pipe_jugador[i][1]);
     }
 
+
     /*
     VARIABLES
+
     jugador         --> variable para contener el numero de jugador de un subproceso
     id_jugador      --> array que contiene el pid de cada hijo
     */
+
     int jugador;
+    int id_jugador[num_players];
     int *pipeFC, *pipeCF;
 
     for (int i = 0; i < num_players; i++){
         x = fork();
         if (x < 0){return 1;}// caso de error
         else if (x == 0){jugador = i+1;break;}// si soy hijo salgo
-        else if (x > 0){//apongo a todos los jugadores en posicion 0
-            pos[i] = 0;
+        else if (x > 0){//agrego id de proceso hijo al array
+            id_jugador[i] = x;
             }
     }
 
-    /*
-    instruccion    --> buffer para recibir y escribir instrucciones a los hijos
-    */
+    //instruccion    --> buffer para recibir y escribir instrucciones a los hijos
+
     char instruccion[msg_len];
 
 
@@ -107,19 +108,19 @@ int main(){
             close(pipe_jugador[i][1][1]);// terminal de escritura
         }
 
-        // turno   --> variable para iterar sobre los turnos
-        // modo    --> recorrer turnos al derecho(0) o al inverso(1)
-        int modo = 0;
-        unsigned turno = 1000;
+        //turno   --> variable para iterar sobre los turnos
+        //id_hijo --> variable que contendra el id del jugador en turno
+        //pipes   --> variables de comunicacion con hijos
+
+        int turno = 0;
 
         while(strcmp(statusWIN,instruccion)!=0){
             //cambio pipes actuales a las que correspondan
-
             pipeFC = pipe_jugador[(turno%4)][0];
             pipeCF = pipe_jugador[(turno%4)][1];
 
-            printf("Turno: %d\n", turno);
-            //printf("Jugador: %d\n", (turno%4));
+            printf("Turno: %d\n", turno+1);
+            //printf("jugador : %d\n", (turno%4));
 
             /*
             Game Master
@@ -135,120 +136,25 @@ int main(){
 
             /*acciones de respuesta*/
 
-            if(strcmp(instruccion,statusOK) == 0){}// el turno termino correctamente, no hsy poderes
+            if(strcmp(instruccion,statusOK) == 0){}// el turno termino correctamente
             else if(strcmp(statusWIN,instruccion) == 0){// el jugador ganó
                 printf("hay ganador \n");
-                sendall(pipe_jugador,statusEND,msg_len);
+                sendall(pipe_jugador,statusEND);
             }
             else if(strcmp(cursedBoard,instruccion) == 0){
-                int **aux = tablero;
-                tablero = cursedTablero;
-                cursedTablero = aux;
-                sendall(pipe_jugador,cursedBoard,msg_len);
+                /*intrucciones para invertir tablero*/
             }
-            else if(strcmp(reverse,instruccion) == 0){
-                if (modo == 0){
-                    modo = 1;
-                }
-                else{modo = 0;}
-            }
-            else if(strcmp(switchFirst,instruccion) == 0){
-                int first = 0;
-                for(int i = 0; i < num_players; i++){
-                    if(pos[i] > first){
-                        first = i;
-                    }
-                    else{}
-                }
-                int pos_act = pos[turno%4];
-                int pos_fir = pos[first];
-                int *aux_pipeFC = pipe_jugador[first][0];
-                int *aux_pipeCF = pipe_jugador[first][1];
-
-                memcpy(instruccion,&pos_fir,sizeof(int));
-                instruccion[5] = 'm';
-                write(pipeFC[1],instruccion,msg_len);
-
-                while(read(pipeCF[0], statusOK, msg_len) < 0){}
-
-                memcpy(instruccion,&pos_act,sizeof(int));
-                instruccion[5] = 'm';
-                write(aux_pipeFC[1],instruccion,msg_len);
-
-                while(read(aux_pipeCF[0], statusOK, msg_len) < 0){}
-            }
-            else if(strcmp(switchLast,instruccion) == 0){
-                int last = numCasillas;
-                for(int i = 0; i < num_players; i++){
-                    if(pos[i] < last){
-                        last = i;
-                    }
-                    else{}
-                }
-                int pos_act = pos[turno%4];
-                int pos_las = pos[last];
-                int *aux_pipeFC = pipe_jugador[last][0];
-                int *aux_pipeCF = pipe_jugador[last][1];
-
-                memcpy(instruccion,&pos_las,sizeof(int));
-                instruccion[5] = 'm';
-                write(pipeFC[1],instruccion,msg_len);
-
-                while(read(pipeCF[0], statusOK, msg_len) < 0){}
-
-                memcpy(instruccion,&pos_act,sizeof(int));
-                instruccion[5] = 'm';
-                write(aux_pipeFC[1],instruccion,msg_len);
-
-                while(read(aux_pipeCF[0], statusOK, msg_len) < 0){}
-            }
+            else if(strcmp(reverse,instruccion) == 0){}
+            else if(strcmp(switchFirst,instruccion) == 0){}
+            else if(strcmp(switchLast,instruccion) == 0){}
             else if(strcmp(skip,instruccion) == 0){
-                if (modo == 0){ turno++;}
-                else{turno--;}
+                turno++;
             }
             else if(strcmp(nextWhite,instruccion) == 0){
-                for(int i = 0; i <num_players; i++){
-                    if(turno%4 != i){
-                        int *aux_pipeFC = pipe_jugador[i][0];
-                        int *aux_pipeCF = pipe_jugador[i][1];
-                        write(aux_pipeFC[1],nextWhite,msg_len);
-                    }
-
-                }
+                sendall(pipe_jugador,nextWhite);
             }
-            else if(strcmp(allBack,instruccion) == 0){
-                int aux = 2;
-                memcpy(instruccion,&aux,sizeof(int));
-                instruccion[4] = 'b';
-                sendall(pipe_jugador,instruccion,msg_len);
-            }
-            else if(strcmp(othersBack,instruccion) == 0){
-                /*
-                int aux = 1;
-                memcpy(instruccion,&aux,sizeof(int));
-                instruccion[4] = 'b';
-                for(int i = 0; i <num_players; i++){
-                    if(turno%4 != i){
-                        int *aux_pipeFC = pipe_jugador[i][0];
-                        int *aux_pipeCF = pipe_jugador[i][1];
-                        write(aux_pipeFC[1],instruccion,msg_len);
-                    }
-
-                }
-                */
-            }
-            else{
-                write(pipeFC[1],instruccion,msg_len);
-            }
-            //checkear ganador
-            for (int i = 0; i < num_players; i++){
-                if(tablero[i][numCasillas-1]){memcpy(instruccion,statusWIN,msg_len);}
-            }
-
-            if(modo == 0){turno++;}
-            else{turno--;}
+            turno++;
         }
-        sendall(pipe_jugador, statusEND,msg_len);
         printf("%s\n", "Sos un crack ganastes");
 
     }
@@ -268,19 +174,17 @@ int main(){
                 char usarPoder[2];
                 srand(getpid()*time(0));
                 int dado = rand()%6+1;
-                printf("%s", "Escriba ok para continuar: ");
-                scanf("%s", usarPoder);
+
+                imprimirTablero();
+
                 printf("Soy el jugador: %d\n", jugador);
                 printf("Posicion actual: %d\n", pos_actual+1);
                 printf("Dado: %d\n", dado);
 
-                imprimirTablero();
-
-                pos_actual = mover_pieza('f', dado, pos_actual, jugador, tablero);
-                pos[jugador-1] = pos_actual;
+                pos_actual = mover_pieza("f", dado, pos_actual, jugador, tablero);
                 printf("Ahora estoy en: %d\n\n", pos_actual+1);
 
-                if(tablero[num_players][pos_actual] == podNor){
+                if(tablero[4][pos_actual] == podNor){
                     printf("%s", "Has caido en una casilla con poder normal (?) :o\n\n");
                     if(jugador == 1){
                         printf("%s\n", "Quieres usar el poder? (si/no)");
@@ -288,31 +192,25 @@ int main(){
                         printf("%s", "\n");
                         if(strcmp(usarPoder, "si") == 0){
                             poder_Nor(instruccion);
-                            write(pipeCF[1],instruccion,msg_len);
                         }
                     }
                     else{
                         poder_Nor(instruccion);
-                        write(pipeCF[1],instruccion,msg_len);
                     }
                 }
-                else if(tablero[num_players][pos_actual] == podSup){
+                else if(tablero[4][pos_actual] == podSup){
                     if(jugador == 1){
                         printf("%s", "Has caido en una casilla con poder superior (? ?) :o\n\n");
                         printf("%s\n", "Quieres usar el poder? (si/no)");
                         scanf("%s", usarPoder);
-                        printf("%s", "\n");
                         if(strcmp(usarPoder, "si") == 0){
                             poder_Sup(instruccion);
-                            write(pipeCF[1],instruccion,msg_len);
                         }
                     }
                     else{
                         poder_Sup(instruccion);
-                        write(pipeCF[1],instruccion,msg_len);
                     }
                 }
-                else{write(pipeCF[1],statusOK,msg_len);}
 
                 if(pos_actual >= numCasillas){
                     write(pipeCF[1],statusWIN,msg_len);
@@ -323,21 +221,18 @@ int main(){
             }
             else if(instruccion[4] == 'f' || instruccion[4] == 'b' || instruccion[4] == 'm'){//mover pieza
                 memcpy(&x,instruccion,4);
-                //char tipoIns[1] = instruccion[4];
-                pos_actual = mover_pieza(instruccion[4],x,pos_actual,jugador,tablero);
-                pos[jugador-1] = pos_actual;
-                write(pipeCF[1], statusOK, msg_len);
                 }
             else if(strcmp(instruccion,cursedBoard) == 0){
-                tablero[jugador-1][pos_actual] = 0;
-                int **aux = tablero;
-                tablero = cursedTablero;
-                cursedTablero = aux;
-                mover_pieza('m',numCasillas-pos_actual,0,jugador,tablero);
+                /*instrucciones para mover piezas dando vuelta el tablero*/
+            }
+            else if(strcmp(instruccion,nextWhite) == 0){
+                /*codgo para mover pieza a la siguiente casilla vacia*/
             }
             else if(strcmp(instruccion,statusEND) == 0){//terminar proceso
                 printf("proceso terminado\n");
             }
+
+
         }
     }
     return 0;
