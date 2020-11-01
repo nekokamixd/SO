@@ -1,9 +1,11 @@
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
 #include <sys/mman.h>
+#include "funciones.h"
 #include <time.h>
 
 //***** Complementos
@@ -37,8 +39,6 @@ void sendall(int *pipes[num_players][2], char * msg, int len){
         int *pipeFC = pipes[i][0];
         int *pipeCF = pipes[i][1];
         write(pipeFC[1],msg,len);
-
-        while(read(pipeCF[0], statusOK, len) < 0){}
     }
 }
 
