@@ -206,14 +206,79 @@ void* create_shared_memory(size_t size){
   return mmap(NULL, size, protection, visibility, -1, 0);
 }
 
-int imprimirTablero(){
+int imprimirTablero(int j1, int j2, int j3, int j4, int** tablero){
+    // Tablero
+    printf("%s\n", "\n  1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29 ");
     printf("%s\n", " ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___ ");
-    for(int i = 1; i < 30; i++){
-        printf("%s", "|_ _|");
+    // Primera linea
+    for(int i = 0; i < numCasillas; i++){
+        if(tablero[num_players][i] ==  inicio){
+            printf("%s", "|ini|");
+        }
+        else if(tablero[num_players][i] ==  fin){
+            printf("%s", "|fin|");
+        }
+        else if(tablero[num_players][i] ==  blanca){
+            printf("%s", "|   |");
+        }
+        else if(tablero[num_players][i] ==  podNor){
+            printf("%s", "| ? |");
+        }
+        else if(tablero[num_players][i] ==  podSup){
+            printf("%s", "|? ?|");
+        }
     }
     printf("%s", "\n");
-    for(int i = 1; i < 30; i++){
-        printf("%s", "|_ _|");
+    // Segunda linea
+    for(int i = 0; i < numCasillas; i++){
+        if(tablero[num_players][i] ==  inicio){
+            printf("%s", "|cio|");
+        }
+        else if(tablero[num_players][i] ==  fin){
+            printf("%s", "|_ _|");
+        }
+        else if(tablero[num_players][i] ==  blanca){
+            printf("%s", "|_ _|");
+        }
+        else if(tablero[num_players][i] ==  podNor){
+            printf("%s", "|_ _|");
+        }
+        else if(tablero[num_players][i] ==  podSup){
+            printf("%s", "|_ _|");
+        }
+    }
+    printf("%s", "\n");
+
+    // Jugadores
+    printf("%s\n", " ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___ ");
+    for(int i = 0; i < numCasillas; i++){
+        if((i == j1) && (i == j2)){
+            printf("%s", "|1 2|");
+        }
+        else if(i == j1){
+            printf("%s", "|1  |");
+        }
+        else if(i == j2){
+            printf("%s", "|  2|");
+        }
+        else{
+            printf("%s", "|   |");
+        }
+    }
+    printf("%s", "\n");
+    for(int i = 0; i < 29; i++){
+        if((i == j3) && (i == j4)){
+            printf("%s", "|3 4|");
+        }
+        else if(i == j3){
+            printf("%s", "|3 _|");
+        }
+        else if(i == j4){
+            printf("%s", "|_ 4|");
+        }
+        else{
+            printf("%s", "|_ _|");
+        }
     }
     printf("%s", "\n\n");
     return 0;

@@ -163,14 +163,13 @@ int main(){
                 int pos_act = pos[turno%4];
                 int pos_fir = pos[first];
                 int *aux_pipeFC = pipe_jugador[first][0];
-                int *aux_pipeCF = pipe_jugador[first][1];
 
                 memcpy(instruccion,&pos_fir,sizeof(int));
-                instruccion[5] = 'm';
+                instruccion[4] = 'm';
                 write(pipeFC[1],instruccion,msg_len);
 
                 memcpy(instruccion,&pos_act,sizeof(int));
-                instruccion[5] = 'm';
+                instruccion[4] = 'm';
                 write(aux_pipeFC[1],instruccion,msg_len);
             }
             else if(strcmp(switchLast,instruccion) == 0){
@@ -186,11 +185,11 @@ int main(){
                 int *aux_pipeFC = pipe_jugador[last][0];
 
                 memcpy(instruccion,&pos_las,sizeof(int));
-                instruccion[5] = 'm';
+                instruccion[4] = 'm';
                 write(pipeFC[1],instruccion,msg_len);
 
                 memcpy(instruccion,&pos_act,sizeof(int));
-                instruccion[5] = 'm';
+                instruccion[4] = 'm';
                 write(aux_pipeFC[1],instruccion,msg_len);
             }
             else if(strcmp(skip,instruccion) == 0){
@@ -198,19 +197,20 @@ int main(){
                 else{turno--;}
             }
             else if(strcmp(nextWhite,instruccion) == 0){
-                for(int i = 0; i <num_players; i++){
+                for(int i = 0; i < num_players; i++){
                     int pl = turno%num_players;
                     if(pl != i){
-                        for (int j = pos[i] + 1; j < numCasillas-1; j++){
+                        for (int j = pos[i]; j < numCasillas-1; j++){
                             if(tablero[num_players][j] == blanca){
                                 int *aux_pipeFC = pipe_jugador[i][0];
                                 memcpy(instruccion,&j,sizeof(int));
                                 instruccion[4] = 'm';
                                 write(aux_pipeFC[1],instruccion,msg_len);
+                                break;
                             }
 
                         }
-                        
+
                     }
                 }
             }
@@ -234,6 +234,13 @@ int main(){
             else{
                 write(pipeFC[1],instruccion,msg_len);
             }
+
+            char ok[2];
+            printf("%s", "Escriba ok para continuar: ");
+            scanf("%s", ok);
+
+            imprimirTablero(pos[0], pos[1], pos[2], pos[3], tablero);
+
             //checkear ganador
             for (int i = 0; i < num_players; i++){
                 if(tablero[i][numCasillas-1] == 1){memcpy(instruccion,statusWIN,msg_len);}
@@ -262,13 +269,9 @@ int main(){
                 char usarPoder[2];
                 srand(getpid()*time(0));
                 int dado = rand()%6+1;
-                printf("%s", "Escriba ok para continuar: ");
-                scanf("%s", usarPoder);
                 printf("Soy el jugador: %d\n", jugador);
                 printf("Posicion actual: %d\n", pos_actual+1);
                 printf("Dado: %d\n", dado);
-
-                imprimirTablero();
 
                 pos_actual = mover_pieza('f', dado, pos_actual, jugador, tablero);
                 pos[jugador-1] = pos_actual;
@@ -295,7 +298,7 @@ int main(){
                 else if(tablero[num_players][pos_actual] == podSup){
                     printf("%s", "Has caido en una casilla con poder superior (? ?) :o\n\n");
                     if(jugador == 1){
-                        
+
                         printf("%s\n", "Quieres usar el poder? (si/no)");
                         scanf("%s", usarPoder);
                         printf("%s", "\n");
@@ -327,6 +330,7 @@ int main(){
                 tablero = cursedTablero;
                 cursedTablero = aux;
                 pos_actual = mover_pieza('m',numCasillas - pos_actual -1,0,jugador,tablero);
+                pos[jugador-1] = pos_actual;
             }
             else if(strcmp(instruccion,statusEND) == 0){//terminar proceso
                 printf("proceso terminado\n");
