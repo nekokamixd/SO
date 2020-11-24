@@ -37,9 +37,9 @@
 
 void sendall(int *pipes[num_players][2], char * msg, int len);
 
-int crear_tablero(int** tablero);
+void crear_tablero(int** tablero);
 
-int crear_cursedTablero(int** tablero);
+void crear_cursedTablero(int** tablero);
 
 int mover_pieza(char direccion, int cantidad, int actual, int jugador, int** tablero);
 
@@ -49,6 +49,6 @@ void poder_Sup(char* aux);
 
 void* create_shared_memory(size_t size);
 
-int imprimirTablero();
+void imprimirTablero();
 
 #endif //FUNCIONES

@@ -1,4 +1,4 @@
-
+//***** Librerías
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -8,41 +8,30 @@
 #include "funciones.h"
 #include <time.h>
 
-//***** Complementos
-#define num_players 4
-#define msg_len 5
-#define numCasillas 29
-
-//***** Mensajes
-#define turn "0000t"
-#define statusOK "00000"    //turno finalizado correctamente
-#define statusWIN "00001"   //el jugador gano la partida
-#define switchFirst "0000p" // cambia jugador actual por el primero
-#define switchLast "0000u"  // cambia jugador actual por el ultimo
-#define reverse "0000r" // invierte orden de jugadores
-#define skip "0000s"    // salta turno
-#define nextWhite "0000n"   // los demas se mueven a la siguiente casilla blanca
-#define statusEND "1111e"   //mensaje para avisarle a los demas jugadores que el juego termino
-#define cursedBoard "0000C"   //mensaje para invertir tablero
-#define othersBack "0000b"  // los demas retroceden una casilla
-#define allBack "0000B" // todos retroceden 2 casillas
-
-//***** Tipos de Casilla
-#define inicio 0
-#define fin 1
-#define blanca 2
-#define podNor 3 //poder normal
-#define podSup 4 //poder superior
-
-void sendall(int *pipes[num_players][2], char * msg, int len){
+/*
+Nombre: sendall
+Parametros:
+    int* pipes[num_players][2]: Matriz de pipes.
+    char* msg: Mensaje que se enviará a los hijos.
+    int len: Largo del mensaje.
+Retorno: funcion void
+Descripcion: Recibe un puntero a las pipes junto con un mensaje y su largo, luego envia el mismo mensaje a todos los hijos.
+*/
+void sendall(int* pipes[num_players][2], char* msg, int len){
     for (int i = 0; i < num_players; i++){
         int *pipeFC = pipes[i][0];
-        int *pipeCF = pipes[i][1];
         write(pipeFC[1],msg,len);
     }
 }
 
-int crear_tablero(int** tablero){
+/*
+Nombre: crear_tablero
+Parametros:
+    int** tablero: Matriz que contiene la fila correspondiente al tablero.
+Retorno: funcion void
+Descripcion: Modifica la fila correspondiente al tablero con los tipos de casillas.
+*/
+void crear_tablero(int** tablero){
     int casillasPoderNor[9] = {2, 4, 6, 12, 14, 21, 23, 25, 27};
     int casillasPoderSup[4] = {16, 22, 24, 26};
     int recorrerNor = 0;
@@ -65,10 +54,17 @@ int crear_tablero(int** tablero){
     tablero[num_players][0] = inicio;
     tablero[num_players][numCasillas-1] = fin;
 
-    return 0;
+    return;
 }
 
-int crear_cursedTablero(int** tablero){
+/*
+Nombre: crear_cursedTablero
+Parametros:
+    int** tablero: Matriz para el tablero invertido que contiene la fila correspondiente al tablero invertido.
+Retorno: funcion void
+Descripcion: Modifica la fila correspondiente al tablero invertido con los tipos de casillas que corresponden a ese tablero.
+*/
+void crear_cursedTablero(int** tablero){
     int casillasPoderNor[4] = {2, 4, 6, 12};
     int casillasPoderSup[9] = {1, 3, 5, 7, 14, 16, 22, 24, 26};
     int recorrerNor = 0;
@@ -91,9 +87,21 @@ int crear_cursedTablero(int** tablero){
     tablero[num_players][0] = inicio;
     tablero[num_players][numCasillas-1] = fin;
 
-    return 0;
+    return;
 }
 
+/*
+Nombre: mover_pieza
+Parametros:
+    char direccion: Caracter que define en que dirección se moverá la pieza.
+    int cantidad: Cantidad de casillas que se moverá la pieza.
+    int actual: Posición actual del jugador.
+    int jugador: Jugador que se mueve.
+    int** tablero: Matriz que contiene las posiciones de cada jugador y el tablero.
+Retorno: (int) Retorna la nueva posición en la que se encuentra el jugador.
+Descripcion: Toma la posición actual del jugador, la dirección y cantidad en la que se moverá para luego
+realizar los cambios en la matriz que contiene las posiciones de cada jugador y el tablero.
+*/
 int mover_pieza(char direccion, int cantidad, int actual, int jugador, int** tablero){
     int nueva_posicion;
 
@@ -118,6 +126,13 @@ int mover_pieza(char direccion, int cantidad, int actual, int jugador, int** tab
     return nueva_posicion;
 }
 
+/*
+Nombre: poder_Nor
+Parametros:
+    char* aux: Dirección del buffer donde se guardará la instrucción resultante.
+Retorno: funcion void
+Descripcion: Calcula qué poder se realizará dentro de los poderes normales y luego copia la instrucción correspondiente al poder en aux.
+*/
 void poder_Nor(char* aux){
     int mover;
 
@@ -160,6 +175,13 @@ void poder_Nor(char* aux){
     return;
 }
 
+/*
+Nombre: poder_Sup
+Parametros:
+    char* aux: Dirección del buffer donde se guardará la instrucción resultante.
+Retorno: funcion void
+Descripcion: Calcula qué poder se realizará dentro de los poderes superiores y luego copia la instrucción correspondiente al poder en aux.
+*/
 void poder_Sup(char* aux){
 
     srand(time(0));
@@ -197,6 +219,13 @@ void poder_Sup(char* aux){
     return;
 }
 
+/*
+Nombre: create_shared_memory
+Parametros:
+    size_t size: Tamaño de la memoria que se solicita.
+Retorno: (void*) Corresponde a la dirección base de la memoria que se solicita.
+Descripcion: Recibe el tamaño de la memoria que se requiere y retorna la dirección a esa memoria.
+*/
 void* create_shared_memory(size_t size){
 
   int protection = PROT_READ | PROT_WRITE;
@@ -206,11 +235,22 @@ void* create_shared_memory(size_t size){
   return mmap(NULL, size, protection, visibility, -1, 0);
 }
 
-int imprimirTablero(int j1, int j2, int j3, int j4, int** tablero){
+/*
+Nombre: imprimirTablero
+Parametros:
+    int j1: Posición en la que se encuentra jugador 1.
+    int j2: Posición en la que se encuentra jugador 2.
+    int j3: Posición en la que se encuentra jugador 3.
+    int j4: Posición en la que se encuentra jugador 4.
+    int** tablero: Matriz que contiene la posición de cada jugador junto con el tablero.
+Retorno: funcion void
+Descripcion: Se encarga de imprimir los números de cada casilla, el tablero con sus tipos de casilla y la posición de los jugadores.
+*/
+void imprimirTablero(int j1, int j2, int j3, int j4, int** tablero){
     // Tablero
     printf("%s\n", "\n  1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20   21   22   23   24   25   26   27   28   29 ");
     printf("%s\n", " ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___  ___ ");
-    // Primera linea
+
     for(int i = 0; i < numCasillas; i++){
         if(tablero[num_players][i] ==  inicio){
             printf("%s", "|ini|");
@@ -229,7 +269,7 @@ int imprimirTablero(int j1, int j2, int j3, int j4, int** tablero){
         }
     }
     printf("%s", "\n");
-    // Segunda linea
+
     for(int i = 0; i < numCasillas; i++){
         if(tablero[num_players][i] ==  inicio){
             printf("%s", "|cio|");
@@ -281,5 +321,5 @@ int imprimirTablero(int j1, int j2, int j3, int j4, int** tablero){
         }
     }
     printf("%s", "\n\n");
-    return 0;
+    return;
 }
