@@ -8,7 +8,7 @@ public class QuickSortThread extends Thread {
 
     public void run(){
         quickSortRecursivo(arreglo, inicio, fin);
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < fin+1; i++) {
             System.out.println(Thread.currentThread().getName()+ " " +arreglo[i]);
         }
     }
