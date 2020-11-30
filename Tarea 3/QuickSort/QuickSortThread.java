@@ -8,6 +8,9 @@ public class QuickSortThread extends Thread {
 
     public void run(){
         quickSortRecursivo(arreglo, inicio, fin);
+        for(int i = 0; i < 10; i++) {
+            System.out.println(Thread.currentThread().getName()+ " " +arreglo[i]);
+        }
     }
 
     public QuickSortThread(int[] arreglo_aux, int inicio_aux, int fin_aux) {
@@ -37,23 +40,23 @@ public class QuickSortThread extends Thread {
 
     public static void quickSortRecursivo(int[] arreglo, int inicio, int fin) {
         if(fin <= inicio) {
-            if (flag==-1){
-                flag = 1;
-                try{
-                    Thread.sleep(1000);}
-                    catch(Exception e){}
-                for(int i = 0; i < 10; i++) {
-                    System.out.println(Thread.currentThread().getName()+ " " +arreglo[i]);
-                }
-                
-            }
             return;
         }
         int pivote = particion(arreglo, inicio, fin);
 
-        Thread t1 = new Thread(new QuickSortThread(arreglo, inicio, pivote-1));
-        Thread t2 = new Thread(new QuickSortThread(arreglo, pivote+1, fin));
+        Thread t1 = new Thread(new QuickSortThread(arreglo, inicio, pivote-1){
+            public void run(){
+                quickSortRecursivo(arreglo, inicio, fin);
+            }
+        });
+        Thread t2 = new Thread(new QuickSortThread(arreglo, pivote+1, fin){
+            public void run(){
+                quickSortRecursivo(arreglo, inicio, fin);
+            }
+        });
         t1.start();
+        try{t1.join();}catch(Exception e){}
         t2.start();
+        try{t2.join();}catch(Exception e){}
     }
 }
