@@ -52,10 +52,6 @@ public class Problema2 {
         Thread t = new Thread(new QuickSortThread(arreglo, 0, n-1));
         t.start();
 
-        for(int i = 0; i < n; i++) {
-            System.out.println(arreglo[i]);
-        }
-
         /*
         Problema2 thread = new Problema2();
         thread.start();

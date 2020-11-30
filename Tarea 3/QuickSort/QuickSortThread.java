@@ -1,7 +1,8 @@
 package QuickSort;
 
-public class QuickSortThread implements Runnable {
-    int[] arreglo;
+public class QuickSortThread extends Thread {
+    volatile static int[] arreglo;
+    volatile static int flag = -1;
     int inicio;
     int fin;
 
@@ -10,7 +11,7 @@ public class QuickSortThread implements Runnable {
     }
 
     public QuickSortThread(int[] arreglo_aux, int inicio_aux, int fin_aux) {
-        this.arreglo = arreglo_aux;
+        arreglo = arreglo_aux;
         this.inicio = inicio_aux;
         this.fin = fin_aux;
     }
@@ -36,6 +37,16 @@ public class QuickSortThread implements Runnable {
 
     public static void quickSortRecursivo(int[] arreglo, int inicio, int fin) {
         if(fin <= inicio) {
+            if (flag==-1){
+                flag = 1;
+                try{
+                    Thread.sleep(1000);}
+                    catch(Exception e){}
+                for(int i = 0; i < 10; i++) {
+                    System.out.println(Thread.currentThread().getName()+ " " +arreglo[i]);
+                }
+                
+            }
             return;
         }
         int pivote = particion(arreglo, inicio, fin);
