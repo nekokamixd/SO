@@ -9,8 +9,12 @@ public class QuickSortThread extends Thread {
     public void run(){
         quickSortRecursivo(arreglo, inicio, fin);
         for(int i = 0; i < fin+1; i++) {
-            System.out.println(Thread.currentThread().getName()+ " " +arreglo[i]);
+            System.out.println(arreglo[i]);
         }
+    }
+
+    public static int[] getArreglo(){
+        return arreglo;
     }
 
     public QuickSortThread(int[] arreglo_aux, int inicio_aux, int fin_aux) {
