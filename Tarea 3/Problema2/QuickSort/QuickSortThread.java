@@ -1,5 +1,11 @@
 package QuickSort;
 
+/*
+Nombre: QuickSortThread
+Parametros: ninguno
+Retorno: no retorna
+Descripcion: Clase encargada de ordenar el arreglo entregado usando QuickSort con threads.
+*/
 public class QuickSortThread extends Thread {
     volatile static int[] arreglo;
     volatile static int flag = -1;
@@ -13,16 +19,40 @@ public class QuickSortThread extends Thread {
         }
     }
 
+    /*
+    Nombre: getArreglo
+    Parametros: ninguno
+    Retorno: int[],
+    Descripcion:
+    */
     public static int[] getArreglo(){
         return arreglo;
     }
 
+    /*
+    Nombre: QuickSortThread
+    Parametros:
+        - int[] arreglo_aux:
+        - int inicio_aux:
+        - int fin_aux:
+    Retorno: no retorna
+    Descripcion: Constructor de la clase QuickSortThread.
+    */
     public QuickSortThread(int[] arreglo_aux, int inicio_aux, int fin_aux) {
         arreglo = arreglo_aux;
         this.inicio = inicio_aux;
         this.fin = fin_aux;
     }
 
+    /*
+    Nombre: particion
+    Parametros:
+        - int[] arreglo:
+        - int inicio:
+        - int fin:
+    Retorno: no retorna
+    Descripcion:
+    */
     public static int particion(int[] arreglo, int inicio, int fin) {
         int pivote = fin;
         int contador = inicio;
@@ -42,6 +72,16 @@ public class QuickSortThread extends Thread {
         return contador;
     }
 
+    /*
+    Nombre: quickSortRecursivo
+    Parametros:
+        - int[] arreglo: Arreglo que se quiere ordenar usando QuickSort.
+        - int inicio:
+        - int fin:
+    Retorno: no retorna
+    Descripcion: Recibe un arreglo, calcula la posicion de la particion en el arreglo que sera el pivote y
+        crea threads llamando a QuickSortThread con los sub arreglos creados para ordenarlos hasta que se llegue al arreglo mas pequeño.
+    */
     public static void quickSortRecursivo(int[] arreglo, int inicio, int fin) {
         if(fin <= inicio) {
             return;

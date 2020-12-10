@@ -1,9 +1,16 @@
-package Funciones;
+import Funciones.*;
 
 import java.io.File;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 
+/*
+Nombre: Problema1
+Parametros: ninguno
+Retorno: no retorna
+Descripcion: Extrae las funciones del archivo funciones.txt y las guarda en un arreglo junto con su cantidad, luego pide
+    funciones con valor hasta que un 1 sea ingresado, mostrando el valor del input ingresado.
+*/
 public class Problema1 {
     public static void main(String[] args) {
         try {
@@ -12,6 +19,8 @@ public class Problema1 {
             Scanner input = new Scanner(System.in);
             String func_input;
             int salida = 0;
+
+            float[] resultado = new float[1];
 
             String cantidad_str = "";
             int cantidad;
@@ -34,13 +43,15 @@ public class Problema1 {
             scan.close();
 
             while (salida != 1) {
-                System.out.println("Ingrese una funcion: (1 para salir)");
+                System.out.println("\nIngrese una funcion: (1 para salir)");
                 func_input = input.nextLine();
                 if (func_input.equals("1")) {
                     salida = 1;
                 } else {
-                    Thread t = new Thread(new Solver(funciones, func_input, cantidad));
+                    Thread t = new Thread(new Solver(funciones, func_input, cantidad, resultado));
                     t.start();
+                    try{t.join();}catch(Exception e){}
+                    System.out.println("Resultado: " + resultado[0]);
                 }
             }
             input.close();

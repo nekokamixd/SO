@@ -1,27 +1,16 @@
-package QuickSort;
+import QuickSort.*;
 import java.time.LocalTime;
 import static java.time.temporal.ChronoUnit.MICROS;
 
+/*
+Nombre: Problema2
+Parametros: ninguno
+Retorno: no retorna
+Descripcion: Crea un arreglo con numeros al azar para ordenar usando el algoritmo de QuickSort, luego se ordena el arreglo usando QuickSort
+    con threads e imprime el tiempo que tarda en ordenarlo, despues se ordena usando QuickSort recursivo e imprime el tiempo que tarda
+    en ordenarlo.
+*/
 public class Problema2 {
-    /*
-    public static void quickSortThreads(int[] arreglo, int inicio, int fin) {
-        if(fin <= inicio) {
-            return;
-        }
-        int pivote = particion(arreglo, inicio, fin);
-
-        Problema2 izq = new Problema2();
-        Thread t_izq = new Thread(izq);
-        t_izq.start();
-        
-        Problema2 der = new Problema2();
-        Thread t_der = new Thread(der);
-        t_der.start();
-        
-        quickSortThreads(arreglo, inicio, pivote-1);
-        quickSortThreads(arreglo, pivote+1, fin);
-    }*/
-
     public static void main (String[] args) {
 
         // Crear arreglo de prueba
@@ -44,7 +33,7 @@ public class Problema2 {
             System.out.println(arreglo[i] );
         }
         System.out.println("\n-------------------");
-        
+
         // Instanciar hilo de QuickSort
         Thread t = new Thread(new QuickSortThread(arreglo, 0, n-1));
         System.out.println("Arreglo ordenado con Threads: \n");
@@ -57,9 +46,9 @@ public class Problema2 {
 
         System.out.println();
         System.out.println("Tiempo de inicio: " + tiempo_inicio);
-        System.out.println("Tiempo de fin:    "+ tiempo_fin);        
+        System.out.println("Tiempo de fin:    "+ tiempo_fin);
         System.out.println("Tiempo de ejecución (microsegundos): " + MICROS.between(tiempo_inicio, tiempo_fin));
-        
+
         //----------------------------------------------------------------
         System.out.println("\n-------------------");
         System.out.println("Arreglo ordenado: \n");
@@ -73,9 +62,9 @@ public class Problema2 {
         }
         System.out.println();
         System.out.println("Tiempo de inicio: " + tiempo_inicio);
-        System.out.println("Tiempo de fin:    "+ tiempo_fin);        
+        System.out.println("Tiempo de fin:    "+ tiempo_fin);
         System.out.println("Tiempo de ejecución (microsegundos): " + MICROS.between(tiempo_inicio, tiempo_fin));
-        
+
 
     }
 }
