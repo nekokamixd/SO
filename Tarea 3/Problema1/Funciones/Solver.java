@@ -51,10 +51,8 @@ public class Solver extends Thread {
     */
     public static float calcular_expresion(String funcion, String input, String expresion) {
         String calculo;
-        int cierre_parentesis_funcion = funcion.indexOf(")");
-        int cierre_parentesis_input = input.indexOf(")");
-        String variable = funcion.substring(2, cierre_parentesis_funcion);
-        String valor = input.substring(2, cierre_parentesis_input);
+        String variable = funcion.substring(funcion.indexOf("("), funcion.indexOf(")")+1);
+        String valor = input.substring(input.indexOf("("), input.indexOf(")")+1);
 
         calculo = expresion.replaceAll(variable, valor);
 
@@ -100,10 +98,9 @@ public class Solver extends Thread {
 
         // Buscar funcion en el arreglo
         for (int i = 0; i < cantidad; i++) {
-            if (Boolean.compare(funciones[i].startsWith(input.substring(0, 1)), true) == 0) {
+            if (Boolean.compare(funciones[i].startsWith(input.substring(0, input.indexOf("(")+1)), true) == 0) {
                 funcion = funciones[i];
-                int igual = funcion.indexOf("=");
-                String get_expresion = funcion.substring(igual+1, funcion.length());
+                String get_expresion = funcion.substring(funcion.indexOf("=")+1, funcion.length());
                 expresion = expresion.concat(get_expresion);
             }
         }
@@ -121,13 +118,11 @@ public class Solver extends Thread {
             // Buscar funciones en la expresion
             for (int i = 0; i < cantidad; i++) {
                 if (expresion.indexOf(funciones[i].substring(0, 3)) > -1) {
-                    int cierre_parentesis_funcion = funciones[i].indexOf(")");
-                    int cierre_parentesis_input = input.indexOf(")");
 
-                    String variable = funciones[i].substring(2, cierre_parentesis_funcion);
-                    String valor = input.substring(2, cierre_parentesis_input);
+                    String variable = funciones[i].substring(funciones[i].indexOf("("), funciones[i].indexOf(")"));
+                    String valor = input.substring(input.indexOf("("), input.indexOf(")"));
 
-                    String nueva_funcion = funciones[i].substring(0, cierre_parentesis_funcion+1);
+                    String nueva_funcion = funciones[i].substring(0, funciones[i].indexOf(")")+1);
 
                     nueva_funcion = nueva_funcion.replace(variable, valor);
                     Thread th = new Thread(new Solver(funciones, nueva_funcion, cantidad, resultado));
