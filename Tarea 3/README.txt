@@ -1,6 +1,13 @@
 -José Montecinos 201804541-1
 -Sofía Palet     201873570-1
 
+NOTAS DE IMPLEMENTACION PREGUNTA 1:
+
+-Se empleó la librería ScriptEngine para resolver las expresiones
+matemáticas, la cual no nos compilaba en Windows por una razón que
+no logramos determinar, sin embargo al probar en Linux todo funcio-
+naba bien asi que recomendamos ejecutar en Linux.
+
 NOTAS DE IMPLEMENTACION PREGUNTA 2:
 
 - El algoritmo de ordenamiento del array de números corresponde
