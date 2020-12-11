@@ -3,7 +3,7 @@ package QuickSort;
 /*
 Nombre: QuickSortSimple
 Parametros: ninguno
-Retorno: no retorna
+Retorno: ninguno
 Descripcion: Clase encargada de ordenar el arreglo entregado usando QuickSort de manera recursiva.
 */
 public class QuickSortSimple{
@@ -15,7 +15,9 @@ public class QuickSortSimple{
         - int inicio:
         - int fin:
     Retorno: int,
-    Descripcion:
+    Descripcion: toma el último elemento del arrelgo como pivote y separa el arreglo
+        en relación a este en números menores y mayores. Finalmente el pivote se deja
+        en la posición que quedará en la posición adecuada y no se moverá más.
     */
     public static int particion(int[] arreglo, int inicio, int fin) {
         int pivote = fin;
