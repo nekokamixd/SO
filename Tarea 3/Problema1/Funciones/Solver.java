@@ -18,6 +18,13 @@ public class Solver extends Thread {
     int cantidad;
     static float[] resultado;
 
+    /*
+    Nombre: run
+    Parametros: ninguno
+    Retorno: no retorna
+    Descripcion: Ejecuta el metodo run inherente a la clase Thread. Dentro de el
+        se ejecuta la funcion para calcular la funcion.
+    */
     public void run() {
         resultado[0] = calcular(funciones, input, cantidad);
     }

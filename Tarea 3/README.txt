@@ -6,7 +6,8 @@ NOTAS DE IMPLEMENTACION PREGUNTA 1:
 - Se empleó la librería ScriptEngine para resolver las expresiones
 matemáticas, la cual no nos compilaba en Windows por una razón que
 no logramos determinar. Sin embargo al probar en Linux todo funcio-
-naba bien asi que recomendamos ejecutar en Linux.
+naba bien asi que recomendamos ejecutar en Linux. No logramos
+desactivar los Warnings que arroja el compilador debido al ScriptEngine.
 
 Consideración: en el archivo "funciones.txt" solo debe haber funciones
 que tengan a "x" como parámetro.
@@ -26,13 +27,13 @@ a un pivote, se crea una thread por cada lado del arreglo que se
 tenga que ordenar para que ejecute el algoritmo.
 
 - Al ejecutar el programa primero se puede visualizar el funciona-
-miento de ambos algoritmos con un arreglo aleatorio de tamaño 10, 
+miento de ambos algoritmos con un arreglo aleatorio de tamaño 10,
 luego se puede ver nuevas ejecuciones de ambos algoritmos con tamaños
 de arreglo cada vez mayores. Por cada ejecución se tiene el:
     - El tamaño del arreglo
     - Tiempo de ejecución de ambos algoritmos
     - Relación del tiempo que tardo un algoritmo respecto del otro
-Cada vez que se ejecuta el algoritmo se crea un arreglo del doble de 
+Cada vez que se ejecuta el algoritmo se crea un arreglo del doble de
 tamaño con numeros aleatorios. Se omitió la impresión de los arreglos
 de gran tamaño para facilitar la lectura.
 

@@ -16,8 +16,8 @@ public class QuickSortThread extends Thread {
     Nombre: run
     Parametros: ninguno
     Retorno: no retorna
-    Descripcion: ejecuta el método run inherente a la clase Thread. Dentro de él
-        se ejecuta la función para ordenar el arreglo.
+    Descripcion: Ejecuta el metodo run inherente a la clase Thread. Dentro de el
+        se ejecuta la funcion para ordenar el arreglo.
     */
     public void run(){
         quickSortRecursivo(arreglo, inicio, fin);
@@ -26,9 +26,9 @@ public class QuickSortThread extends Thread {
     /*
     Nombre: QuickSortThread
     Parametros:
-        - int[] arreglo_aux:
-        - int inicio_aux:
-        - int fin_aux:
+        - int[] arreglo_aux: Arreglo que se quiere ordenar.
+        - int inicio_aux: Posicion de inicio de la porcion de arreglo.
+        - int fin_aux: Posicion final de la porcion de arreglo.
     Retorno: no retorna
     Descripcion: Constructor de la clase QuickSortThread.
     */
@@ -41,13 +41,13 @@ public class QuickSortThread extends Thread {
     /*
     Nombre: particion
     Parametros:
-        - int[] arreglo:
-        - int inicio:
-        - int fin:
-    Retorno: int,
-    Descripcion: toma el último elemento del arrelgo como pivote y separa el arreglo
-        en relación a este en números menores y mayores. Finalmente el pivote se deja
-        en la posición que quedará en la posición adecuada y no se moverá más.
+        - int[] arreglo: Arreglo que se quiere ordenar usando QuickSort.
+        - int inicio: Posicion de inicio en la porción del arreglo en donde se deberá iterar.
+        - int fin: Posicion final en la porción del arreglo en donde se deberá iterar.
+    Retorno: int, retorna la posicion en el arreglo donde quedo el pivote.
+    Descripcion: Toma el ultimo elemento del arrelgo como pivote y separa el arreglo
+        en relacion a este en numeros menores y mayores. Finalmente el pivote se deja
+        en la posición adecuada y no se moverá más.
     */
     public static int particion(int[] arreglo, int inicio, int fin) {
         int pivote = fin;
@@ -72,8 +72,8 @@ public class QuickSortThread extends Thread {
     Nombre: quickSortRecursivo
     Parametros:
         - int[] arreglo: Arreglo que se quiere ordenar usando QuickSort.
-        - int inicio:
-        - int fin:
+        - int inicio: Posicion de inicio en la porción del arreglo que se ordenara.
+        - int fin: Posicion final en la porción del arreglo que se ordenara.
     Retorno: no retorna
     Descripcion: Recibe un arreglo, calcula la posicion de la particion en el arreglo que sera el pivote y
         crea threads llamando a QuickSortThread con los sub arreglos creados para ordenarlos hasta que se llegue al arreglo mas pequeño.

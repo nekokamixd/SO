@@ -6,9 +6,10 @@ import static java.time.temporal.ChronoUnit.MICROS;
 Nombre: Problema2
 Parametros: ninguno
 Retorno: no retorna
-Descripcion: Crea un arreglo con numeros al azar para ordenar usando el algoritmo de QuickSort, luego se ordena el arreglo usando QuickSort
-    con threads e imprime el tiempo que tarda en ordenarlo, despues se ordena usando QuickSort recursivo e imprime el tiempo que tarda
-    en ordenarlo.
+Descripcion: Crea un arreglo con numeros aleatorios para ordenar usando el algoritmo
+    de QuickSort, luego se ordena el arreglo usando QuickSort recursivo e imprime
+    el tiempo que tarda en ordenarlo, despues se ordena usando QuickSort con threads
+    e imprime el tiempo que tarda en ordenarlo.
 */
 public class Problema2 {
     public static void main (String[] args) {
@@ -48,7 +49,7 @@ public class Problema2 {
             System.out.println(arreglo_aux[i] );
         }
         System.out.println();
-        System.out.println("Tiempo de inicio:  " + tiempo_inicio);
+        System.out.println("Tiempo de inicio: " + tiempo_inicio);
         System.out.println("Tiempo de término: " + tiempo_fin);
         System.out.println("Tiempo de ejecución (microsegundos): " + MICROS.between(tiempo_inicio, tiempo_fin));
         System.out.println("\n-------------------");
@@ -68,12 +69,12 @@ public class Problema2 {
 
         System.out.println();
         System.out.println("Tiempo de inicio: " + tiempo_inicio);
-        System.out.println("Tiempo de término:    "+ tiempo_fin);
+        System.out.println("Tiempo de término: "+ tiempo_fin);
         System.out.println("Tiempo de ejecución (microsegundos): " + MICROS.between(tiempo_inicio, tiempo_fin));
         System.out.println("\n-------------------");
 
         /*Comparación de algoritmos*/
-        System.out.println("Comparación de algoritmos:\n");    
+        System.out.println("Comparación de algoritmos:\n");
         for (n = 10; n <= 10240; ){
             // variables
             long duracionThread = 0;
