@@ -5,8 +5,8 @@ class mesa:
     def __init__(self):
         self.bandeja = None
     
-    def insert_bandeja(self, bandeja):
-        self.bandeja = bandeja
+    def insert_bandeja(self,bandejaEntrante):
+        self.bandeja = bandejaEntrante
 
     def release_bandeja(self):
         aux = self.bandeja
@@ -30,6 +30,53 @@ class bandeja:
 
     def getId(self):
         return self.id
+
+class Juan(Thread):
+    def __init__(self, lock_fila, cv_fila_aCliente, cv_fila_aJuan, bandejas, servidos_actual, cocina):
+        Thread.__init__(self)
+        self.lock_fila = lock_fila
+        self.cv_fila_aCliente = cv_fila_aCliente
+        self.cv_fila_aJuan = cv_fila_aJuan
+        self.bandejas = bandejas
+        self.servidos_actual = servidos_actual
+        self.cocina = cocina
+
+    def run(self):
+        while (servidos_actual[0] < numero_atendiendo):
+        lock_fila.acquire()
+        while (cocina.get_bandeja() == None):
+            cv_fila_aJuan.wait()
+        aux_bandeja = mesa.get_bandeja()
+        aux_bandeja.llenar()
+        time.sleep(3)
+        mesa.release_bandeja()
+        servidos_actual[0] += 1
+        cv_fila_aCliente.notify_all()
+        lock_fila.release()
+
+
+class Cliente(Thread):
+    def __init__(self, numero_atendiendo, bandeja, lock_fila, cv_fila_aCliente, cv_fila_aJuan, servidos_actual, cocina):
+        Thread.__init__(self)
+        self.numero_atendiendo = numero_atendiendo
+        self.bandeja = bandeja
+        self.lock_fila = lock_fila
+        self.cv_fila_aCliente = cv_fila_aCliente
+        self.cv_fila_aJuan = self.cv_fila_aJuan
+        self.servidos_actual = servidos_actual
+        self.cocina = cocina
+
+    def run(self):
+        print(numero_atendiendo)
+        lock_fila.acquire()
+        while (cocina.get_bandeja() != None):
+            cv_fila_aCliente.wait()
+        mesa.insert_bandeja(bandeja)
+        print("Ya comi uwu")
+        servidos_actual[1] += 1
+        cv_fila_aJuan.notify()
+        lock_fila.release()
+
 
 def juan_funcion(lock_fila, cv_fila_aCliente, cv_fila_aJuan, bandejas, servidos_actual, cocina):
     while (servidos_actual[0] < numero_atendiendo):
