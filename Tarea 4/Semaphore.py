@@ -1,53 +1,66 @@
+import threading
 from threading import Thread
-from threading import Lock
-from threading import Condition
 from threading import Semaphore
 import time
 
-class bandeja:
-    def __init__(self, numero):
-        self.comida = False
-        self.id = numero
+cant_bandejas = input("Cantidad de bandejas: ")
+cant_clientes = input("Cantidad de clientes: ")
 
-    def comer(self):
-        self.comida = False
+s_bandejasFila = Semaphore(1)
+s_bandejasBandejero = Semaphore(1)
+s_JuanSirviendo = Semaphore(1)
 
-    def llenar(self):
-        self.comida = True
+s_cantidadBandejasFila = Semaphore(int(cant_bandejas))
+s_cantidadBandejasBandejero = Semaphore(0)
 
-    def getId(self):
-        return self.id
+s_esperandoParaAyudar = Semaphore(1)
+s_necesitoAyuda = Semaphore(1)
 
 class Cliente(Thread):
-    def __init__(self, boletito, bandeja, lock_fila, cv_fila_aCliente, cv_fila_aJuan, mesa):
+    def __init__(self):
         Thread.__init__(self)
-        self.boletito = boletito
-        self.bandeja = bandeja
-        self.lock_fila = lock_fila
-        self.cv_fila_aCliente = cv_fila_aCliente
-        self.cv_fila_aJuan = cv_fila_aJuan
-        self.mesa = mesa
 
     def run(self):
+        global s_bandejasFila, s_bandejasBandejero, s_JuanSirviendo, s_cantidadBandejasFila, s_cantidadBandejasBandejero
+        id_cliente = threading.get_ident()
+
+        # SACAR BANDEJAS
+
+        # Hola, vengo a sacar una bandeja
+        # Hay una persona sacando una bandeja :c espero noma
+        s_bandejasFila.acquire() # Por fin puedo sacar una bandeja
+        print(str(id_cliente)+": Estoy sacando una bandeja ;)")
+        s_cantidadBandejasFila.acquire() # *sacando bandeja*
+        print(str(id_cliente)+": Ya saque la bandeja, grax, pase mi rey")
+        s_bandejasFila.release() # *deja que el siguiente cliente saque bandeja
+
+        # BUSCAR ALMUERZO
+
+        print(str(id_cliente)+": Toy comiendo")
+        time.sleep(5) # Tarda 5 segundos en comerse un canape wtf
+        print(str(id_cliente)+": Ya comi")
+        s_cantidadBandejasBandejero.release()
+
+        # AYUDAR AL HERMANO
+
+class Juan(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+
+    def run(self):
+        global s_bandejasFila, s_bandejasBandejero, s_JuanSirviendo
+        print("Hola soy Juan c:")
         
-        with self.lock_fila:
-            print("Mi boletito es: "+str(self.boletito))
-            while (self.mesa.get_bandeja() != None):
-                self.cv_fila_aCliente.wait()
-            self.mesa.insert_bandeja(self.bandeja)
-            self.cv_fila_aJuan.notify()
-            print("Ya comi uwu" + " Boletito: " + str(self.boletito))
-
 def main():
-    cant_bandejas = input("Cantidad de bandejas: ")
-    cant_clientes = input("Cantidad de clientes: ")
+    global s_bandejasFila, s_bandejasBandejero, s_JuanSirviendo
+    global cant_bandejas, cant_clientes, bandejas, mesa
 
-    bandejas = Semaphore(30)
-    bandejero = Semaphore(int(cant_bandejas)/2)
-
-    fila_clientes = Semaphore(int(cant_clientes))
-
-    tc1 = Cliente(boletito, bandeja, lock_fila, cv_fila_aCliente, cv_fila_aJuan, mesa)
+    thread_juan = Juan()
+    thread_juan.start()
+    
+    for cliente in range(int(cant_clientes)):
+        thread = Cliente()
+        thread.start()
    
 if __name__ == '__main__':
     main()

@@ -1,6 +1,7 @@
 from threading import Thread
 from threading import Lock
 from threading import Condition
+from threading import Semaphore
 import time
 
 lock_fila= Lock()
@@ -9,8 +10,9 @@ cv_fila_aCliente = Condition(lock_fila)
 servidos_actual = [0, 0]
 cant_bandejas = input("Cantidad de bandejas: ")
 cant_clientes = input("Cantidad de clientes: ")
-bandejaId = 0
+clientes_esperando = Semaphore(int(cant_clientes))
 bandejas = []
+
 class bandeja:
     def __init__(self, numero):
         self.comida = False
@@ -62,12 +64,13 @@ class Cliente(Thread):
 
         print("Ya comi uwu" + " Boletito: " + str(self.boletito))
         lock_fila.release()
+
 class Juan(Thread):
     def __init__(self):
         Thread.__init__(self)
 
     def run(self):
-        global lock_fila, cv_fila_aCliente, cv_fila_aJuan, mesa
+        global lock_fila, cv_fila_aCliente, cv_fila_aJuan, mesa, clientes_esperando
         while (True):
             with lock_fila:
                 while (mesa.get_bandeja() == None):
@@ -75,20 +78,25 @@ class Juan(Thread):
                 time.sleep(3)
                 mesa.get_bandeja().llenar()
                 mesa.release_bandeja()
+                clientes_esperando.release()
                 cv_fila_aCliente.notify_all()
                 
 
 def main():
-    global lock_fila,cv_fila_aJuan,cv_fila_aCliente,servidos_actual,cant_bandejas,cant_clientes,bandejaId,bandejas,mesa
+    # servidos_actual = [almuerzos servidos, almuerzo que se debe servir]
+    # bandejas = Lista de bandejas
+    # boletito = Boletito para hacer la fila
+    global lock_fila, cv_fila_aJuan, cv_fila_aCliente
+    global servidos_actual, cant_bandejas, cant_clientes, bandejas, mesa
 
     for b in range(int(cant_bandejas)):
         bandejas.append(bandeja(b))
 
-    boletito = 1
-    
     thread_juan = Juan()
     thread_juan.start()
 
+    boletito = 1
+    
     for cliente in range(int(cant_clientes)):
         thread = Cliente(boletito, bandejas.pop(0))
         thread.start()
