@@ -1,0 +1,15 @@
+Sirviendo al cliente 22764, hora: 17:56:19
+Sirviendo al cliente 10016, hora: 17:56:22
+Sirviendo al cliente 9884, hora: 17:56:25
+Sirviendo al cliente 9968, hora: 17:56:29
+Sirviendo al cliente 16224, hora: 17:56:32
+Sirviendo al cliente 15432, hora: 17:56:35
+Sirviendo al cliente 24032, hora: 17:56:38
+Sirviendo al cliente 14384, hora: 17:56:41
+Sirviendo al cliente 23604, hora: 17:56:44
+Sirviendo al cliente 17668, hora: 17:56:47
+Sirviendo al cliente 18300, hora: 17:56:50
+Sirviendo al cliente 12628, hora: 17:56:53
+Sirviendo al cliente 12028, hora: 17:56:56
+Sirviendo al cliente 10704, hora: 17:56:59
+Sirviendo al cliente 16840, hora: 17:57:02

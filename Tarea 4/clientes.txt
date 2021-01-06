@@ -1,0 +1,45 @@
+Cliente 22764 sacando bandeja en la fila, hora: 17:56:19
+Cliente 22764 esperando a que le Juan le sirva almuerzo, hora: 17:56:19
+Cliente 10016 sacando bandeja en la fila, hora: 17:56:19
+Cliente 9884 sacando bandeja en la fila, hora: 17:56:19
+Cliente 9968 sacando bandeja en la fila, hora: 17:56:19
+Cliente 16224 sacando bandeja en la fila, hora: 17:56:19
+Cliente 15432 sacando bandeja en la fila, hora: 17:56:19
+Cliente 24032 sacando bandeja en la fila, hora: 17:56:19
+Cliente 14384 sacando bandeja en la fila, hora: 17:56:19
+Cliente 23604 sacando bandeja en la fila, hora: 17:56:19
+Cliente 17668 sacando bandeja en la fila, hora: 17:56:19
+Cliente 18300 sacando bandeja en la fila, hora: 17:56:19
+Cliente 12628 sacando bandeja en la fila, hora: 17:56:19
+Cliente 12028 sacando bandeja en la fila, hora: 17:56:19
+Cliente 10704 sacando bandeja en la fila, hora: 17:56:19
+Cliente 16840 sacando bandeja en la fila, hora: 17:56:19
+Cliente 10016 esperando a que le Juan le sirva almuerzo, hora: 17:56:22
+Cliente 9884 esperando a que le Juan le sirva almuerzo, hora: 17:56:25
+Cliente 22764 termino de comer, hora: 17:56:27
+Cliente 9968 esperando a que le Juan le sirva almuerzo, hora: 17:56:28
+Cliente 10016 termino de comer, hora: 17:56:30
+Cliente 16224 esperando a que le Juan le sirva almuerzo, hora: 17:56:32
+Cliente 9884 termino de comer, hora: 17:56:33
+Cliente 15432 esperando a que le Juan le sirva almuerzo, hora: 17:56:35
+Cliente 9968 termino de comer, hora: 17:56:37
+Cliente 24032 esperando a que le Juan le sirva almuerzo, hora: 17:56:38
+Cliente 16224 termino de comer, hora: 17:56:40
+Cliente 14384 esperando a que le Juan le sirva almuerzo, hora: 17:56:41
+Cliente 15432 termino de comer, hora: 17:56:43
+Cliente 23604 esperando a que le Juan le sirva almuerzo, hora: 17:56:44
+Cliente 24032 termino de comer, hora: 17:56:46
+Cliente 17668 esperando a que le Juan le sirva almuerzo, hora: 17:56:47
+Cliente 14384 termino de comer, hora: 17:56:49
+Cliente 18300 esperando a que le Juan le sirva almuerzo, hora: 17:56:50
+Cliente 23604 termino de comer, hora: 17:56:52
+Cliente 12628 esperando a que le Juan le sirva almuerzo, hora: 17:56:53
+Cliente 17668 termino de comer, hora: 17:56:55
+Cliente 12028 esperando a que le Juan le sirva almuerzo, hora: 17:56:56
+Cliente 18300 termino de comer, hora: 17:56:58
+Cliente 10704 esperando a que le Juan le sirva almuerzo, hora: 17:56:59
+Cliente 12628 termino de comer, hora: 17:57:01
+Cliente 16840 esperando a que le Juan le sirva almuerzo, hora: 17:57:02
+Cliente 12028 termino de comer, hora: 17:57:04
+Cliente 10704 termino de comer, hora: 17:57:07
+Cliente 16840 termino de comer, hora: 17:57:10
