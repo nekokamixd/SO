@@ -1,13 +1,14 @@
 import threading
 from threading import Thread
 from threading import Semaphore
+from threading import Event
 import time
 from datetime import datetime
 
 cant_bandejas = input("Cantidad de bandejas: ")
 cant_clientes = input("Cantidad de clientes: ")
 bandejas = [] # Lista de bandejas
-existeClienteAyudando = 0
+bandejasSucias = [] # bandejas usadas
 
 # Semaforo para que solo una persona use el recurso
 s_usarBandejeroFila = Semaphore(1)
@@ -15,6 +16,11 @@ s_usarBandejero = Semaphore(1)
 s_usarMesa = Semaphore(1)
 s_JuanSirviendo = Semaphore(0)
 s_clienteAyudando = Semaphore(1)
+s_sentarseParaAlmorzar = Semaphore(1)
+e_yaAlmorce = Event()
+e_estoyAyudando = Event()
+e_hayAyudante = Event()
+e_estoyAlmorzando = Event()
 
 # Semaforo con la cantidad de bandejas que hay en cada bandejero
 s_cantidadBandejasFila = Semaphore(int(cant_bandejas))
@@ -85,6 +91,28 @@ class cocina:
         return self.cliente
 
 mesa = cocina()
+mesaAlmuerzo = cocina()
+
+class Acompanante(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+    
+    def run(self):
+        global s_clienteAyudando, e_estoyAyudando, e_yaAlmorce, e_estoyAlmorzando
+        global mesaAlmuerzo
+
+        s_clienteAyudando.acquire()
+        e_yaAlmorce.clear()
+        e_estoyAyudando.set()
+        if(e_estoyAlmorzando.wait(30)):
+            e_yaAlmorce.wait()
+            bandeja = mesaAlmuerzo.get_bandeja()
+            mesaAlmuerzo.release_bandeja()
+            e_estoyAyudando.clear()
+            bandejasSucias.append(bandeja)
+            s_cantidadBandejasBandejero.release()
+        else:
+            e_hayAyudante.clear()
 
 """
 Nombre: Cliente
@@ -97,7 +125,7 @@ class Cliente(Thread):
 
     def run(self):
         global s_usarBandejeroFila, s_cantidadBandejasFila, s_cantidadBandejasBandejero
-        global bandejas, mesa, existeClienteAyudando
+        global bandejas, mesa, mesaAlmuerzo, existeClienteAyudando
         id_cliente = threading.get_ident()
 
         # SACAR BANDEJAS
@@ -123,18 +151,48 @@ class Cliente(Thread):
         s_usarMesa.release()
 
         # COMER ALMUERZO
-        #if ():
-        #else:
+        
+        s_sentarseParaAlmorzar.acquire()
 
+        # Si hay quien para ayudarme, almuerzo, su no traigo un amigui
+
+        if(e_hayAyudante.is_set()):
+        else:
+            Acomp = Acompanante()
+            Acomp.start()
+        
+        e_estoyAyudando.wait()
+
+        e_estoyAlmorzando.set()
+        mesaAlmuerzo.insert_bandeja()
         time.sleep(5) # Cliente come su almuerzo
-        s_cantidadBandejasBandejero.release()
+        bandeja.comer()
+        e_yaAlmorce.set()
         now = datetime.now()
         f_clientes = open("clientes.txt", "a")
         f_clientes.write("Cliente " + str(id_cliente) + " termino de comer, hora: " + now.strftime("%H:%M:%S") + "\n")
         f_clientes.close()
+        s_sentarseParaAlmorzar.release()
 
         # AYUDAR AL SIGUIENTE
 
+        s_clienteAyudando.acquire()
+            #Limpio los eventos de comer y despues ayudo
+        e_estoyAlmorzando.clear()
+        e_yaAlmorce.clear()
+        e_estoyAyudando.set()
+        if(e_estoyAlmorzando.wait(30)):
+            e_estoyAyudando.clear()
+            e_yaAlmorce.wait()
+            bandeja = mesaAlmuerzo.get_bandeja()
+            mesaAlmuerzo.release_bandeja()
+            bandejasSucias.append(bandeja)
+            s_cantidadBandejasBandejero.release()
+        else:
+            e_estoyAyudando.clear()
+            e_hayAyudante.clear()
+        
+        
         # DEJAR BANDEJA
 
 """
