@@ -26,6 +26,7 @@ s_sacarNumero = Semaphore(1)
 s_hayEspacioBandejero = Semaphore(maxCapacidadBandejero)
 s_cantidadBandejasFila = Semaphore(int(cant_bandejas))
 s_boletero = Semaphore(1)
+s_boleteroDejarBandeja = Semaphore(1)
 
 # Eventos de Coordinación
 end = Event()
@@ -33,8 +34,8 @@ e_hayCliente = Event()
 e_almuerzoServido = Event()
 e_estoyAlmorzando = Event()
 e_yaAlmorce = Event()
-e_estoyAyudando = Event()
 e_hayAyudante = Event()
+e_estoyAyudando = Event()
 e_ayudanteTieneBandeja = Event()
 
 e_HayBandejasFila = Event()
@@ -228,7 +229,12 @@ class Cliente(Thread):
             e_estoyAyudando.clear()
 
             # DEJAR BANDEJA
-            s_hayEspacioBandejero.acquire()
+            s_boleteroDejarBandeja.acquire()
+            if(s_hayEspacioBandejero.acquire(0) == False):
+                e_bandejeroLleno.set()
+                s_hayEspacioBandejero.acquire()
+            s_boleteroDejarBandeja.release()
+
             s_usarBandejero.acquire()
             # Si el bandejero esta lleno
             if (len(bandejasSucias) >= maxCapacidadBandejero):
@@ -295,7 +301,7 @@ class Juan(Thread):
                     bandejas.append(bandejasSucias.pop(0))
                     s_hayEspacioBandejero.release()
                     s_cantidadBandejasFila.release()
-                e_HayBandejasFila.clear()
+                e_HayBandejasFila.set()
                 e_JuanRepusoBandejas.set()
                 e_hayBandejasBandejero.clear()
                 s_usarBandejero.release()
@@ -308,6 +314,7 @@ class Juan(Thread):
                 while(len(bandejasSucias) > 0):
                     bandejas.append(bandejasSucias.pop(0))
                     s_cantidadBandejasFila.release()
+                    s_hayEspacioBandejero.release()
                 print("Lleve las bandejas a la fila")
                 e_bandejeroLleno.clear()
                 e_JuanVacioBandejero.set()
