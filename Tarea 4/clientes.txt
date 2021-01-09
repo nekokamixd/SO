@@ -1,12 +1,19 @@
-Cliente 21924 sacando bandeja en la fila, hora: 15:31:41
-Cliente 21924 esperando a que Juan le sirva almuerzo, hora: 15:31:41
-Cliente 21924 termino de comer, hora: 15:31:49
-Companero dejando bandeja en el bandejero, hora: 15:31:49
-Cliente 4032 sacando bandeja en la fila, hora: 15:31:52
-Cliente 4032 esperando a que Juan le sirva almuerzo, hora: 15:31:52
-Cliente 4032 termino de comer, hora: 15:32:00
-Cliente 21924 dejando bandeja en el bandejero, hora: 15:31:49
-Cliente 8356 sacando bandeja en la fila, hora: 15:32:03
-Cliente 8356 esperando a que Juan le sirva almuerzo, hora: 15:32:03
-Cliente 8356 termino de comer, hora: 15:32:11
-Cliente 4032 dejando bandeja en el bandejero, hora: 15:32:00
+Cliente 21636 sacando bandeja en la fila, hora: 17:36:27
+Cliente 21636 esperando a que Juan le sirva almuerzo, hora: 17:36:27
+Cliente 19116 sacando bandeja en la fila, hora: 17:36:27
+Cliente 21804 sacando bandeja en la fila, hora: 17:36:27
+Cliente 21900 sacando bandeja en la fila, hora: 17:36:27
+Cliente 21876 sacando bandeja en la fila, hora: 17:36:27
+Cliente 17556 sacando bandeja en la fila, hora: 17:36:27
+Cliente 20524 sacando bandeja en la fila, hora: 17:36:27
+Cliente 19116 esperando a que Juan le sirva almuerzo, hora: 17:36:30
+Cliente 21804 esperando a que Juan le sirva almuerzo, hora: 17:36:33
+Cliente 21636 termino de comer, hora: 17:36:35
+Companero dejando bandeja en el bandejero, hora: 17:36:35
+Cliente 21900 esperando a que Juan le sirva almuerzo, hora: 17:36:36
+Cliente 21876 esperando a que Juan le sirva almuerzo, hora: 17:36:39
+Cliente 21636 dejando bandeja en el bandejero, hora: 17:36:35
+Cliente 19116 termino de comer, hora: 17:36:40
+Cliente 17556 esperando a que Juan le sirva almuerzo, hora: 17:36:42
+Cliente 21804 termino de comer, hora: 17:36:45
+Cliente 20524 esperando a que Juan le sirva almuerzo, hora: 17:36:45

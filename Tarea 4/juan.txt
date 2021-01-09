@@ -1,5 +1,7 @@
-Sirviendo al cliente 21924, hora: 15:31:41
-Rellenando bandejero de la fila, hora: 15:31:52
-Sirviendo al cliente 4032, hora: 15:31:52
-Rellenando bandejero de la fila, hora: 15:32:03
-Sirviendo al cliente 8356, hora: 15:32:03
+Sirviendo al cliente 21636, hora: 17:36:27
+Sirviendo al cliente 19116, hora: 17:36:30
+Sirviendo al cliente 21804, hora: 17:36:33
+Sirviendo al cliente 21900, hora: 17:36:36
+Sirviendo al cliente 21876, hora: 17:36:39
+Sirviendo al cliente 17556, hora: 17:36:42
+Sirviendo al cliente 20524, hora: 17:36:45

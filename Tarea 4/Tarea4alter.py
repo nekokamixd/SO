@@ -10,8 +10,7 @@ cant_bandejas = input("Cantidad de bandejas: ")
 cant_clientes = input("Cantidad de clientes: ")
 bandejas = [] # Lista de bandejas
 bandejasSucias = [] # Bandejas usadas
-maxCapacidadBandejero = math.ceil(int(cant_bandejas)/2)
-# end = False
+maxCapacidadBandejero = 2
 
 # Semáforo para que solo una persona use el recurso
 s_usarBandejeroFila = Semaphore(1)
@@ -21,7 +20,12 @@ s_JuanSirviendo = Semaphore(0)
 s_clienteAyudando = Semaphore(1)
 s_sentarseParaAlmorzar = Semaphore(1)
 
+s_hayEspacioBandejero = Semaphore(maxCapacidadBandejero)
+s_cantidadBandejasFila = Semaphore(int(cant_bandejas))
+s_boletero = Semaphore(1)
+
 # Eventos de Coordinación
+end = Event()
 e_hayCliente = Event()
 e_almuerzoServido = Event()
 e_estoyAlmorzando = Event()
@@ -108,8 +112,8 @@ class Acompanante(Thread):
         Thread.__init__(self)
     
     def run(self):
-        global s_clienteAyudando, e_estoyAyudando, e_yaAlmorce, e_estoyAlmorzando, e_hayAyudante
-        global mesaAlmuerzo, bandejasSucias, maxCapacidadBandejero
+        global s_clienteAyudando, e_estoyAyudando, e_yaAlmorce, e_estoyAlmorzando, e_hayAyudante, e_bandejeroLleno, s_usarBandejero
+        global mesaAlmuerzo, bandejasSucias, maxCapacidadBandejero, s_boletero
         print("se crea ayudante")
         s_clienteAyudando.acquire()
         e_hayAyudante.set()
@@ -126,9 +130,8 @@ class Acompanante(Thread):
             e_estoyAyudando.clear()
 
             # DEJAR BANDEJA
+            s_hayEspacioBandejero.acquire()
             s_usarBandejero.acquire()
-            if(len(bandejasSucias) == maxCapacidadBandejero):
-                print("Chuta, bandejero lleno")
             now = datetime.now()
             f_clientes = open("clientes.txt", "a")
             f_clientes.write("Companero dejando bandeja en el bandejero, hora: " + now.strftime("%H:%M:%S") + "\n")
@@ -151,20 +154,19 @@ class Cliente(Thread):
         Thread.__init__(self)
 
     def run(self):
-        global s_usarBandejeroFila, e_almuerzoServido
+        global s_usarBandejeroFila, e_almuerzoServido, e_bandejeroLleno, e_JuanRepusoBandejas
         global bandejas, mesa, mesaAlmuerzo, existeClienteAyudando, maxCapacidadBandejero
         id_cliente = threading.get_ident()
 
         # SACAR BANDEJAS
-        s_usarBandejeroFila.acquire()
-        if (len(bandejas) == 0):
+        s_boletero.acquire()
+        if (s_cantidadBandejasFila.acquire(0) == False):
             e_JuanRepusoBandejas.clear()
             e_noHayBandejasFila.set() # Llamando a Juan para que traiga bandejas
             e_JuanRepusoBandejas.wait() # Espera a que Juan reponga bandejas
-        """
-        if (bandejero fila vacio):
-            llamar a Juan
-        """
+        s_boletero.release()
+        s_usarBandejeroFila.acquire()
+        # Si el bandejero de la fila esta vacio
         now = datetime.now()
         f_clientes = open("clientes.txt", "a")
         f_clientes.write("Cliente " + str(id_cliente) + " sacando bandeja en la fila, hora: " + now.strftime("%H:%M:%S") + "\n")
@@ -210,7 +212,7 @@ class Cliente(Thread):
         e_yaAlmorce.clear()
         e_ayudanteTieneBandeja.clear()
         e_estoyAyudando.set()
-        if(e_estoyAlmorzando.wait(8)):
+        if(e_estoyAlmorzando.wait(8)):  # Corregir, espera 30 [s]
             e_yaAlmorce.wait()
             bandeja = mesaAlmuerzo.get_bandeja()
             mesaAlmuerzo.release_bandeja()
@@ -218,9 +220,16 @@ class Cliente(Thread):
             e_estoyAyudando.clear()
 
             # DEJAR BANDEJA
+            s_hayEspacioBandejero.acquire()
             s_usarBandejero.acquire()
-            if(len(bandejasSucias) >= maxCapacidadBandejero):
-                print("Chuta, bandejero lleno")
+            # Si el bandejero esta lleno
+            if (len(bandejasSucias) >= maxCapacidadBandejero):
+                print("Chuta, cliente bandejero lleno")
+                print(len(bandejasSucias))
+                print(maxCapacidadBandejero)
+                e_JuanVacioBandejero.clear()
+                e_bandejeroLleno.set()
+                e_JuanVacioBandejero.wait()
             f_clientes = open("clientes.txt", "a")
             f_clientes.write("Cliente " + str(id_cliente) + " dejando bandeja en el bandejero, hora: " + now.strftime("%H:%M:%S") + "\n")
             f_clientes.close()
@@ -231,13 +240,8 @@ class Cliente(Thread):
         else:
             e_estoyAyudando.clear()
             e_hayAyudante.clear()
-            print("no hay mas gente pa ayudar, me wa il") # Corregir, espera 30 [s]
+            print("no hay mas gente pa ayudar, me wa il")
         s_clienteAyudando.release()
-
-        """
-        if (bandejero lleno):
-            llamar a Juan
-        """
 
 """
 Nombre: Juan
@@ -249,10 +253,10 @@ class Juan(Thread):
         Thread.__init__(self)
 
     def run(self):
-        global s_JuanSirviendo, e_hayCliente, e_almuerzoServido
-        global mesa
+        global s_JuanSirviendo, e_hayCliente, e_almuerzoServido, e_bandejeroLleno, s_usarBandejero
+        global mesa, end
 
-        while (True):
+        while (end.is_set() != True):
             # SERVIR ALMUERZOS
             sirviendo_almuerzos = True
             while (sirviendo_almuerzos):
@@ -270,7 +274,7 @@ class Juan(Thread):
                 else:
                     sirviendo_almuerzos = False
                     
-            # RELLENAR BANDEJEROS
+            # RELLENAR BANDEJERO FILA
             if (e_noHayBandejasFila.is_set()):
                 e_hayBandejasBandejero.wait()
                 s_usarBandejero.acquire()
@@ -280,22 +284,31 @@ class Juan(Thread):
                 f_juan.close()
                 while(len(bandejasSucias) > 0):
                     bandejas.append(bandejasSucias.pop(0))
+                    s_hayEspacioBandejero.release()
+                    s_cantidadBandejasFila.release()
                 e_noHayBandejasFila.clear()
                 e_JuanRepusoBandejas.set()
                 e_hayBandejasBandejero.clear()
                 s_usarBandejero.release()
-            
+
+            # VACIAR BANDEJERO
             if (e_bandejeroLleno.is_set()):
                 print("Chuta, el bandejero esta lleno")
-                s_usarBandejero.acquire()
+                s_usarBandejeroFila.acquire()
                 while(len(bandejasSucias) > 0):
                     bandejas.append(bandejasSucias.pop(0))
+                    s_cantidadBandejasFila.release()
                 print("Lleve las bandejas a la fila")
                 e_bandejeroLleno.clear()
-                s_usarBandejero.release()
+                e_JuanVacioBandejero.set()
+                s_usarBandejeroFila.release()
+            
             
 def main(): 
-    global cant_bandejas, cant_clientes, bandejas, mesa, e_hayBandejasBandejero
+    global cant_bandejas, cant_clientes, bandejas, mesa, e_hayBandejasBandejero, end, e_bandejeroLleno
+    
+    e_bandejeroLleno.clear()
+    end.clear()
 
     for b in range(int(cant_bandejas)):
         bandejas.append(bandeja())
@@ -312,15 +325,12 @@ def main():
         thread = Cliente()
         thread.start()
 
-    """
-    while (end == False):
+    while (end.is_set() != True):
         input_ = input("Ingrese 1 para añadir más clientes, ingrese 0 para terminar el programa.\n")
         if (input_ == '1'):
             print("Se quiere añadir cliente")
         elif (input_ == '0'):
-            end = True
-            print("Se quiere terminar el programa")
-    """
+            end.set()
 
 if __name__ == '__main__':
     main()
