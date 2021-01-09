@@ -12,6 +12,8 @@ bandejas = [] # Lista de bandejas
 bandejasSucias = [] # Bandejas usadas
 maxCapacidadBandejero = 2
 
+numeroCliente = 1
+
 # Semáforo para que solo una persona use el recurso
 s_usarBandejeroFila = Semaphore(1)
 s_usarBandejero = Semaphore(1)
@@ -19,6 +21,7 @@ s_usarMesa = Semaphore(1)
 s_JuanSirviendo = Semaphore(0)
 s_clienteAyudando = Semaphore(1)
 s_sentarseParaAlmorzar = Semaphore(1)
+s_sacarNumero = Semaphore(1)
 
 s_hayEspacioBandejero = Semaphore(maxCapacidadBandejero)
 s_cantidadBandejasFila = Semaphore(int(cant_bandejas))
@@ -34,7 +37,7 @@ e_estoyAyudando = Event()
 e_hayAyudante = Event()
 e_ayudanteTieneBandeja = Event()
 
-e_noHayBandejasFila = Event()
+e_HayBandejasFila = Event()
 e_hayBandejasBandejero = Event()
 e_bandejeroLleno = Event()
 e_JuanRepusoBandejas = Event()
@@ -154,19 +157,24 @@ class Cliente(Thread):
         Thread.__init__(self)
 
     def run(self):
-        global s_usarBandejeroFila, e_almuerzoServido, e_bandejeroLleno, e_JuanRepusoBandejas
-        global bandejas, mesa, mesaAlmuerzo, existeClienteAyudando, maxCapacidadBandejero
+        global s_usarBandejeroFila, e_almuerzoServido, e_bandejeroLleno, e_JuanRepusoBandejas, s_sacarNumero
+        global bandejas, mesa, mesaAlmuerzo, existeClienteAyudando, maxCapacidadBandejeron, numeroCliente
         id_cliente = threading.get_ident()
 
-        # SACAR BANDEJAS
+        s_sacarNumero.acquire()
+        id_cliente = numeroCliente
+        numeroCliente +=1
+        s_sacarNumero.release() 
+
+        
         s_boletero.acquire()
         if (s_cantidadBandejasFila.acquire(0) == False):
-            e_JuanRepusoBandejas.clear()
-            e_noHayBandejasFila.set() # Llamando a Juan para que traiga bandejas
-            e_JuanRepusoBandejas.wait() # Espera a que Juan reponga bandejas
+            e_HayBandejasFila.clear() # Llamando a Juan para que traiga bandejas
+            s_cantidadBandejasFila.acquire()
         s_boletero.release()
+
+        # SACAR BANDEJAS
         s_usarBandejeroFila.acquire()
-        # Si el bandejero de la fila esta vacio
         now = datetime.now()
         f_clientes = open("clientes.txt", "a")
         f_clientes.write("Cliente " + str(id_cliente) + " sacando bandeja en la fila, hora: " + now.strftime("%H:%M:%S") + "\n")
@@ -273,9 +281,10 @@ class Juan(Thread):
                     e_almuerzoServido.set()
                 else:
                     sirviendo_almuerzos = False
+                    print("ya no sirvo almuerzos")
                     
             # RELLENAR BANDEJERO FILA
-            if (e_noHayBandejasFila.is_set()):
+            if (e_HayBandejasFila.is_set() == False):
                 e_hayBandejasBandejero.wait()
                 s_usarBandejero.acquire()
                 f_juan = open("juan.txt", "a")
@@ -286,10 +295,11 @@ class Juan(Thread):
                     bandejas.append(bandejasSucias.pop(0))
                     s_hayEspacioBandejero.release()
                     s_cantidadBandejasFila.release()
-                e_noHayBandejasFila.clear()
+                e_HayBandejasFila.clear()
                 e_JuanRepusoBandejas.set()
                 e_hayBandejasBandejero.clear()
                 s_usarBandejero.release()
+                print("juan rellena fila")
 
             # VACIAR BANDEJERO
             if (e_bandejeroLleno.is_set()):
@@ -302,6 +312,7 @@ class Juan(Thread):
                 e_bandejeroLleno.clear()
                 e_JuanVacioBandejero.set()
                 s_usarBandejeroFila.release()
+                print("juan vacía Fila")
             
             
 def main(): 
@@ -328,8 +339,13 @@ def main():
     while (end.is_set() != True):
         input_ = input("Ingrese 1 para añadir más clientes, ingrese 0 para terminar el programa.\n")
         if (input_ == '1'):
-            print("Se quiere añadir cliente")
+            thread = Cliente()
+            thread.start()
         elif (input_ == '0'):
+            f_juan = open("juan.txt", "a")
+            now = datetime.now()
+            f_juan.write("Juan se retira del casino" + ", hora: " + now.strftime("%H:%M:%S") + "\n")
+            f_juan.close()
             end.set()
 
 if __name__ == '__main__':
