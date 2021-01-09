@@ -157,14 +157,11 @@ class Cliente(Thread):
 
         # SACAR BANDEJAS
         s_usarBandejeroFila.acquire()
+        # Si no hay bandejas en la fila
         if (len(bandejas) == 0):
             e_JuanRepusoBandejas.clear()
             e_noHayBandejasFila.set() # Llamando a Juan para que traiga bandejas
             e_JuanRepusoBandejas.wait() # Espera a que Juan reponga bandejas
-        """
-        if (bandejero fila vacio):
-            llamar a Juan
-        """
         now = datetime.now()
         f_clientes = open("clientes.txt", "a")
         f_clientes.write("Cliente " + str(id_cliente) + " sacando bandeja en la fila, hora: " + now.strftime("%H:%M:%S") + "\n")
@@ -219,8 +216,11 @@ class Cliente(Thread):
 
             # DEJAR BANDEJA
             s_usarBandejero.acquire()
-            if(len(bandejasSucias) >= maxCapacidadBandejero):
-                print("Chuta, bandejero lleno")
+            # Si el bandejero esta lleno
+            if (len(bandejasSucias) >= maxCapacidadBandejero):
+                e_JuanVacioBandejero.clear()
+                e_bandejeroLleno.set()
+                e_JuanVacioBandejero.wait()
             f_clientes = open("clientes.txt", "a")
             f_clientes.write("Cliente " + str(id_cliente) + " dejando bandeja en el bandejero, hora: " + now.strftime("%H:%M:%S") + "\n")
             f_clientes.close()
@@ -233,11 +233,6 @@ class Cliente(Thread):
             e_hayAyudante.clear()
             print("no hay mas gente pa ayudar, me wa il") # Corregir, espera 30 [s]
         s_clienteAyudando.release()
-
-        """
-        if (bandejero lleno):
-            llamar a Juan
-        """
 
 """
 Nombre: Juan
@@ -287,12 +282,13 @@ class Juan(Thread):
             
             if (e_bandejeroLleno.is_set()):
                 print("Chuta, el bandejero esta lleno")
-                s_usarBandejero.acquire()
+                s_usarBandejeroFila.acquire()
                 while(len(bandejasSucias) > 0):
                     bandejas.append(bandejasSucias.pop(0))
                 print("Lleve las bandejas a la fila")
                 e_bandejeroLleno.clear()
-                s_usarBandejero.release()
+                e_JuanVacioBandejero.set()
+                s_usarBandejeroFila.release()
             
 def main(): 
     global cant_bandejas, cant_clientes, bandejas, mesa, e_hayBandejasBandejero
